@@ -32,11 +32,55 @@ SNU Healthing You API - NestJS 기반 REST API 서버
 - ✅ API 버전 관리 (v1)
 - ✅ 유효성 검사 (class-validator)
 - ✅ CORS 지원
+- ✅ Prisma ORM (PostgreSQL)
 
 ## Project setup
 
+### 1. 의존성 설치
+
 ```bash
 $ npm install
+```
+
+### 2. 환경 변수 설정
+
+`.env` 파일을 생성하고 다음 내용을 추가하세요:
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/snu_healthing_you?schema=public"
+```
+
+### 3. PostgreSQL 데이터베이스 생성
+
+PostgreSQL이 설치되어 있어야 합니다. 다음 명령어로 데이터베이스를 생성하세요:
+
+```bash
+# PostgreSQL에 접속
+psql -U postgres
+
+# 데이터베이스 생성
+CREATE DATABASE snu_healthing_you;
+
+# 종료
+\q
+```
+
+### 4. Prisma 마이그레이션 실행
+
+```bash
+# Prisma Client 생성
+$ npx prisma generate
+
+# 데이터베이스 마이그레이션 적용
+$ npx prisma migrate dev --name init
+```
+
+### 5. Prisma Studio (선택사항)
+
+데이터베이스를 시각적으로 확인하려면:
+
+```bash
+$ npx prisma studio
 ```
 
 ## Compile and run the project
@@ -64,7 +108,12 @@ $ npm run start:prod
 모든 API는 `/api/v1` 접두사를 사용합니다:
 
 ```
-GET  /api/v1          - 헬스 체크
+GET    /api/v1          - 헬스 체크
+GET    /api/v1/users    - 사용자 목록 조회
+POST   /api/v1/users    - 사용자 생성
+GET    /api/v1/users/:id - 사용자 조회
+PATCH  /api/v1/users/:id - 사용자 수정
+DELETE /api/v1/users/:id - 사용자 삭제
 ```
 
 ## Run tests

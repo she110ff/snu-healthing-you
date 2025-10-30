@@ -42,6 +42,7 @@ async function bootstrap() {
     .setDescription(swaggerDescription)
     .setVersion(configService.get<string>('API_VERSION', '1.0'))
     .addTag('health')
+    .addTag('users')
     .addBearerAuth()
     .build();
 
