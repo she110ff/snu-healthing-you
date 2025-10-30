@@ -40,7 +40,7 @@ export class UsersService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       select: {
@@ -65,7 +65,7 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     await this.findOne(id); // 존재 여부 및 삭제 여부 확인
 
     const updateData: any = { ...updateUserDto };
@@ -90,7 +90,7 @@ export class UsersService {
     });
   }
 
-  async remove(id: number): Promise<DeleteUserResponseDto> {
+  async remove(id: string): Promise<DeleteUserResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });

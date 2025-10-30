@@ -12,13 +12,34 @@ datasource db {
 
 // 샘플 User 모델
 model User {
-  id        Int       @id @default(autoincrement())
+  id        String    @id @default(uuid())
   email     String    @unique
   password  String
   name      String?
+  role      String    @default("USER") // USER, ADMIN
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   @@map("users")
+}
+
+// -------------------------------------------
+// 2. 기관, 정책, 미션 모델 (어드민 관리)
+// -------------------------------------------
+
+model InstitutionConfig {
+  id                         String  @id @default(uuid())
+  name                       String  @unique // "서울대학교"
+  emailForm                  String  @unique // "snu.ac.kr"
+  contactPersonName          String? // 담당자명
+  contactPersonPhone         String? // 담당자 연락처
+  contactPersonEmail         String? // 담당자 이메일
+  businessRegistrationNumber String? // 사업자등록번호
+  pointPoolTotal             BigInt
+  pointPoolRemaining         BigInt
+  pointLimitPerUser          Int // 개인별 월간 포인트 지급 한도
+  affiliationCodes           Json // [{"code": "SNU01", "name": "교원"}, ...]
+
+  @@map("institution_configs")
 }

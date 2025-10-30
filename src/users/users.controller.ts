@@ -6,7 +6,7 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe,
+  ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
@@ -64,7 +64,7 @@ export class UsersController {
     summary: '사용자 조회',
     description: '특정 사용자의 정보를 조회합니다.',
   })
-  @ApiParam({ name: 'id', description: '사용자 ID', type: Number })
+  @ApiParam({ name: 'id', description: '사용자 ID (UUID)', type: String })
   @ApiResponse({
     status: 200,
     description: '사용자 정보를 성공적으로 조회했습니다.',
@@ -75,7 +75,7 @@ export class UsersController {
     status: 401,
     description: '인증이 필요합니다.',
   })
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findOne(id);
   }
 
@@ -86,7 +86,7 @@ export class UsersController {
     summary: '사용자 수정',
     description: '특정 사용자의 정보를 수정합니다.',
   })
-  @ApiParam({ name: 'id', description: '사용자 ID', type: Number })
+  @ApiParam({ name: 'id', description: '사용자 ID (UUID)', type: String })
   @ApiResponse({
     status: 200,
     description: '사용자 정보가 성공적으로 수정되었습니다.',
@@ -98,7 +98,7 @@ export class UsersController {
     description: '인증이 필요합니다.',
   })
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.update(id, updateUserDto);
@@ -112,7 +112,7 @@ export class UsersController {
     description:
       '특정 사용자를 소프트 삭제합니다. deletedAt 필드가 설정되어 실제로는 데이터베이스에서 제거되지 않습니다.',
   })
-  @ApiParam({ name: 'id', description: '사용자 ID', type: Number })
+  @ApiParam({ name: 'id', description: '사용자 ID (UUID)', type: String })
   @ApiResponse({
     status: 200,
     description: '사용자가 성공적으로 삭제되었습니다.',
@@ -125,7 +125,7 @@ export class UsersController {
     description: '인증이 필요합니다.',
   })
   remove(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<DeleteUserResponseDto> {
     return this.usersService.remove(id);
   }

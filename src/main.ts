@@ -51,6 +51,7 @@ async function bootstrap() {
     .addTag('health')
     .addTag('users')
     .addTag('auth')
+    .addTag('institution-config')
     .addBearerAuth(
       {
         type: 'http',

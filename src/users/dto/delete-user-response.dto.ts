@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class DeleteUserResponseDto {
   @ApiProperty({
-    description: '삭제된 사용자 ID',
-    example: 1,
+    description: '삭제된 사용자 ID (UUID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  id: number;
+  id: string;
 
   @ApiProperty({
     description: '삭제된 사용자 이메일',

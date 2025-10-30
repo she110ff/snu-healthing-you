@@ -11,15 +11,17 @@ export class LoginResponseDto {
   @ApiProperty({
     description: '사용자 정보',
     example: {
-      id: 1,
+      id: '123e4567-e89b-12d3-a456-426614174000',
       email: 'user@example.com',
       name: '홍길동',
+      role: 'USER',
     },
   })
   user: {
-    id: number;
+    id: string;
     email: string;
     name: string | null;
+    role: string;
   };
 }
 
