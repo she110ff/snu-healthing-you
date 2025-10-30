@@ -3,9 +3,11 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
 
   // 글로벌 접두사 설정 (API 버전 관리)
@@ -26,6 +28,11 @@ async function bootstrap() {
     origin: configService.get<string>('CORS_ORIGIN', '*'),
   });
 
+  // 정적 파일 서빙 (Swagger 커스텀 스크립트)
+  app.useStaticAssets(join(__dirname, '..', 'swagger'), {
+    prefix: '/swagger/',
+  });
+
   // Swagger 설정
   const swaggerTitle = configService.get<string>(
     'SWAGGER_TITLE',
@@ -43,14 +50,33 @@ async function bootstrap() {
     .setVersion(configService.get<string>('API_VERSION', '1.0'))
     .addTag('health')
     .addTag('users')
-    .addBearerAuth()
+    .addTag('auth')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'bearer',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(swaggerPath, app, document, {
     swaggerOptions: {
       persistAuthorization: true,
+      onComplete: () => {
+        // Swagger UI 로드 완료 후 커스텀 스크립트가 실행되도록 약간의 지연
+        setTimeout(() => {
+          console.log('Swagger UI loaded, custom script should execute');
+        }, 100);
+      },
     },
+    customJs: '/swagger/swagger-ui-custom.js',
+    customSiteTitle: swaggerTitle,
   });
 
   const port = configService.get<number>('PORT', 3000);
