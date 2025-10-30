@@ -25,6 +25,12 @@ async function main() {
       approvedByAdmin: true, // 관리자는 자동 승인 상태
       approvedAt: new Date('2025-10-30T17:24:07.837Z'),
       approvedById: '59d70d42-639c-4d8f-92e9-cd659c1b03c0', // 자기 자신을 승인자로 설정
+      dateOfBirth: new Date('1990-01-01'),
+      gender: 'MALE',
+      height: 175.0,
+      weight: 70.0,
+      sido: '서울특별시',
+      guGun: '관악구',
       createdAt: new Date('2025-10-30T17:24:07.837Z'),
       updatedAt: new Date('2025-10-30T17:24:07.837Z'),
     },

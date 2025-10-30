@@ -25,7 +25,7 @@ export class UsersService {
    * 회원가입 (이메일 인증 포함)
    */
   async register(createUserDto: CreateUserDto) {
-    const { verificationCode, ...userData } = createUserDto;
+    const { verificationCode, dateOfBirth, ...userData } = createUserDto;
 
     // 이메일 인증코드 검증
     await this.emailVerificationService.verifyCode({
@@ -50,6 +50,7 @@ export class UsersService {
         password: hashedPassword,
         emailVerified: true,
         approvedByAdmin: false,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
       },
       select: {
         id: true,
@@ -57,6 +58,12 @@ export class UsersService {
         name: true,
         emailVerified: true,
         approvedByAdmin: true,
+        dateOfBirth: true,
+        gender: true,
+        height: true,
+        weight: true,
+        sido: true,
+        guGun: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -67,14 +74,16 @@ export class UsersService {
    * 사용자 생성 (내부 사용, 관리자용)
    */
   async create(createUserDto: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const { verificationCode, dateOfBirth, ...userData } = createUserDto;
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
 
     return this.prisma.user.create({
       data: {
-        ...createUserDto,
+        ...userData,
         password: hashedPassword,
         emailVerified: true,
         approvedByAdmin: false,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
       },
       select: {
         id: true,
@@ -82,6 +91,12 @@ export class UsersService {
         name: true,
         emailVerified: true,
         approvedByAdmin: true,
+        dateOfBirth: true,
+        gender: true,
+        height: true,
+        weight: true,
+        sido: true,
+        guGun: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -102,6 +117,12 @@ export class UsersService {
         name: true,
         emailVerified: true,
         approvedByAdmin: true,
+        dateOfBirth: true,
+        gender: true,
+        height: true,
+        weight: true,
+        sido: true,
+        guGun: true,
         createdAt: true,
         updatedAt: true,
         deletedAt: true,
@@ -119,6 +140,12 @@ export class UsersService {
         name: true,
         emailVerified: true,
         approvedByAdmin: true,
+        dateOfBirth: true,
+        gender: true,
+        height: true,
+        weight: true,
+        sido: true,
+        guGun: true,
         createdAt: true,
         updatedAt: true,
         deletedAt: true,
@@ -206,6 +233,12 @@ export class UsersService {
         approvedByAdmin: true,
         approvedAt: true,
         approvedById: true,
+        dateOfBirth: true,
+        gender: true,
+        height: true,
+        weight: true,
+        sido: true,
+        guGun: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -225,6 +258,11 @@ export class UsersService {
       updateData.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
+    // dateOfBirth 문자열을 DateTime으로 변환
+    if (updateData.dateOfBirth) {
+      updateData.dateOfBirth = new Date(updateData.dateOfBirth);
+    }
+
     return this.prisma.user.update({
       where: { id },
       data: updateData,
@@ -234,6 +272,12 @@ export class UsersService {
         name: true,
         emailVerified: true,
         approvedByAdmin: true,
+        dateOfBirth: true,
+        gender: true,
+        height: true,
+        weight: true,
+        sido: true,
+        guGun: true,
         createdAt: true,
         updatedAt: true,
         deletedAt: true,
