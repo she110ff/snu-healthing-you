@@ -29,6 +29,14 @@ export class AuthService {
       throw new UnauthorizedException('삭제된 사용자입니다.');
     }
 
+    if (!user.emailVerified) {
+      throw new UnauthorizedException('이메일 인증이 완료되지 않았습니다.');
+    }
+
+    if (!user.approvedByAdmin) {
+      throw new UnauthorizedException('관리자 승인이 필요합니다.');
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {

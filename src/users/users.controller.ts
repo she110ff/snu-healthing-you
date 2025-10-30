@@ -8,31 +8,63 @@ import {
   Delete,
   ParseUUIDPipe,
   UseGuards,
+  Request,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+  ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
+  ApiConflictResponse,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DeleteUserResponseDto } from './dto/delete-user-response.dto';
+import { UserStatusResponseDto } from './dto/user-status-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
+  @Post('register')
   @ApiOperation({
-    summary: '사용자 생성',
-    description: '새로운 사용자를 생성합니다. (회원가입)',
+    summary: '회원가입',
+    description: '이메일 인증코드를 포함하여 새 사용자를 등록합니다.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: '회원가입이 성공적으로 완료되었습니다.',
+  })
+  @ApiBadRequestResponse({
+    description: '잘못된 요청입니다. (인증코드 오류 등)',
+  })
+  @ApiConflictResponse({
+    description: '이미 가입된 이메일입니다.',
+  })
+  async register(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.register(createUserDto);
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth('bearer')
+  @ApiOperation({
+    summary: '사용자 생성 (관리자 전용)',
+    description: '관리자가 새로운 사용자를 직접 생성합니다.',
   })
   @ApiResponse({
     status: 201,
     description: '사용자가 성공적으로 생성되었습니다.',
   })
-  @ApiResponse({
-    status: 400,
-    description: '잘못된 요청입니다.',
+  @ApiUnauthorizedResponse({
+    description: '인증이 필요하거나 관리자 권한이 필요합니다.',
   })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
@@ -57,6 +89,29 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get(':id/status')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('bearer')
+  @ApiOperation({
+    summary: '사용자 상태 조회',
+    description: '특정 사용자의 이메일 인증 및 관리자 승인 상태를 조회합니다.',
+  })
+  @ApiParam({ name: 'id', description: '사용자 ID (UUID)', type: String })
+  @ApiResponse({
+    status: 200,
+    description: '사용자 상태를 성공적으로 조회했습니다.',
+    type: UserStatusResponseDto,
+  })
+  @ApiResponse({ status: 404, description: '사용자를 찾을 수 없습니다.' })
+  @ApiUnauthorizedResponse({
+    description: '인증이 필요합니다.',
+  })
+  async getStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<UserStatusResponseDto> {
+    return this.usersService.getUserStatus(id);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('bearer')
@@ -77,6 +132,33 @@ export class UsersController {
   })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findOne(id);
+  }
+
+  @Patch(':id/approve')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth('bearer')
+  @ApiOperation({
+    summary: '사용자 승인 (관리자 전용)',
+    description: '관리자가 사용자의 가입을 승인합니다.',
+  })
+  @ApiParam({ name: 'id', description: '승인할 사용자 ID (UUID)', type: String })
+  @ApiResponse({
+    status: 200,
+    description: '사용자가 성공적으로 승인되었습니다.',
+  })
+  @ApiBadRequestResponse({
+    description: '이메일 인증이 완료되지 않았거나 이미 승인된 사용자입니다.',
+  })
+  @ApiResponse({ status: 404, description: '사용자를 찾을 수 없습니다.' })
+  @ApiUnauthorizedResponse({
+    description: '인증이 필요하거나 관리자 권한이 필요합니다.',
+  })
+  async approve(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Request() req: any,
+  ) {
+    const adminId = req.user.id; // JWT에서 관리자 ID 추출
+    return this.usersService.approveUser(id, adminId);
   }
 
   @Patch(':id')

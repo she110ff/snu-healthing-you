@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { InstitutionConfigModule } from './institution-config/institution-config.module';
+import { EmailVerificationModule } from './email-verification/email-verification.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { InstitutionConfigModule } from './institution-config/institution-config
     UsersModule,
     AuthModule,
     InstitutionConfigModule,
+    EmailVerificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

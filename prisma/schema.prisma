@@ -12,16 +12,35 @@ datasource db {
 
 // 샘플 User 모델
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
-  name      String?
-  role      String    @default("USER") // USER, ADMIN
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  id               String    @id @default(uuid())
+  email            String    @unique
+  password         String
+  name             String?
+  role             String    @default("USER") // USER, ADMIN
+  emailVerified    Boolean   @default(false)
+  approvedByAdmin  Boolean   @default(false)
+  approvedAt       DateTime?
+  approvedById     String?
+  approvedBy       User?     @relation("UserApprovals", fields: [approvedById], references: [id])
+  approvedUsers    User[]    @relation("UserApprovals")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
 
   @@map("users")
+}
+
+// 이메일 인증 모델
+model EmailVerification {
+  id         String    @id @default(uuid())
+  email      String    @unique
+  code       String    // 해시된 인증코드
+  expiresAt  DateTime
+  verifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("email_verifications")
 }
 
 // -------------------------------------------
