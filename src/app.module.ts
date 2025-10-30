@@ -9,6 +9,7 @@ import { InstitutionConfigModule } from './institution-config/institution-config
 import { EmailVerificationModule } from './email-verification/email-verification.module';
 import { HealthCheckupModule } from './health-checkup/health-checkup.module';
 import { DiseaseHistoryModule } from './disease-history/disease-history.module';
+import { InterestGroupModule } from './interest-group/interest-group.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { DiseaseHistoryModule } from './disease-history/disease-history.module';
     EmailVerificationModule,
     HealthCheckupModule,
     DiseaseHistoryModule,
+    InterestGroupModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -33,6 +33,7 @@ model User {
   guGun            String?         // 구군
   healthCheckups   HealthCheckup[]
   diseaseHistory   DiseaseHistory?
+  interestGroup    InterestGroup?
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
   deletedAt        DateTime?
@@ -151,6 +152,25 @@ model DiseaseHistory {
   updatedAt                  DateTime      @updatedAt
   
   @@map("disease_histories")
+}
+
+// 관심 그룹 모델 (온보딩 추가 질문)
+model InterestGroup {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 관심 그룹 (단일 선택)
+  // 선택지: 일반인 그룹, 암 치료 후 회복 그룹, 당뇨 관리 그룹, 당뇨 고위험 그룹,
+  //        고혈압 관리 그룹, 고혈압 고위험 그룹, 이상지질혈증 관리 그룹, 이상지질혈증 고위험 그룹
+  group     String   // "GENERAL" | "CANCER_RECOVERY" | "DIABETES_MANAGEMENT" | "DIABETES_HIGH_RISK" | 
+                     // "HYPERTENSION_MANAGEMENT" | "HYPERTENSION_HIGH_RISK" | 
+                     // "DYSLIPIDEMIA_MANAGEMENT" | "DYSLIPIDEMIA_HIGH_RISK"
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("interest_groups")
 }
 
 
