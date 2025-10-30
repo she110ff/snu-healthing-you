@@ -32,6 +32,7 @@ model User {
   sido             String?         // 시도
   guGun            String?         // 구군
   healthCheckups   HealthCheckup[]
+  diseaseHistory   DiseaseHistory?
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
   deletedAt        DateTime?
@@ -73,31 +74,83 @@ model InstitutionConfig {
 }
 
 // -------------------------------------------
-// 3. 건강검진, 추가질문-질환/헬스스캐닝 모델 (온보딩)
+// 3. 건강검진, 추가질문-질환/관심그룹/헬스스캐닝 모델 (온보딩)
 // -------------------------------------------
 // 건강검진 모델
 model HealthCheckup {
-  id                    String    @id @default(uuid())
+  id                    String         @id @default(uuid())
   userId                String
-  user                  User      @relation(fields: [userId], references: [id])
-  checkupDate           DateTime? // 건강 검진일
-  bmi                   Float?    // 1. 체질량지수 (BMI)
-  waistCircumference    Float?    // 2. 허리둘레 (cm)
-  systolicBloodPressure Int?      // 3. 수축기 혈압
-  diastolicBloodPressure Int?     // 3. 이완기 혈압
-  totalCholesterol      Int?      // 4. 총 콜레스테롤 (mg/dL)
-  hdlCholesterol        Int?      // 5. HDL 고밀도 지단백 (mg/dL) - 좋은 콜레스테롤
-  ldlCholesterol        Int?      // 6. LDL 저밀도 지단백 (mg/dL) - 나쁜 콜레스테롤
-  triglycerides         Int?      // 7. 중성지방 트리글리세라이드 (mg/dL)
-  hemoglobin            Float?    // 8. 혈색소 (g/dL)
-  ast                   Int?      // 9. AST (GOT) - 간, 근육 등 손상 시 상승
-  alt                   Int?      // 10. ALT (GPT) - 간 손상 시 상승
-  serumCreatinine       Float?    // 11. 혈청크레아티닌 (mg/dL) - 신장 기능 저하 시 상승
-  glomerularFiltrationRate Float? // 12. 신사구체여과율 (mL/min) - GFR, 신장 기능 저하 시 저하
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  user                  User           @relation(fields: [userId], references: [id])
+  checkupDate           DateTime?      // 건강 검진일
+  bmi                   Float?         // 1. 체질량지수 (BMI)
+  waistCircumference    Float?         // 2. 허리둘레 (cm)
+  systolicBloodPressure Int?           // 3. 수축기 혈압
+  diastolicBloodPressure Int?          // 3. 이완기 혈압
+  totalCholesterol      Int?           // 4. 총 콜레스테롤 (mg/dL)
+  hdlCholesterol        Int?           // 5. HDL 고밀도 지단백 (mg/dL) - 좋은 콜레스테롤
+  ldlCholesterol        Int?           // 6. LDL 저밀도 지단백 (mg/dL) - 나쁜 콜레스테롤
+  triglycerides         Int?           // 7. 중성지방 트리글리세라이드 (mg/dL)
+  hemoglobin            Float?         // 8. 혈색소 (g/dL)
+  ast                   Int?           // 9. AST (GOT) - 간, 근육 등 손상 시 상승
+  alt                   Int?           // 10. ALT (GPT) - 간 손상 시 상승
+  serumCreatinine       Float?         // 11. 혈청크레아티닌 (mg/dL) - 신장 기능 저하 시 상승
+  glomerularFiltrationRate Float?      // 12. 신사구체여과율 (mL/min) - GFR, 신장 기능 저하 시 저하
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
   
   @@map("health_checkups")
+}
+
+// 질환 이력 모델 (건강검진 저장 후 추가 질문)
+model DiseaseHistory {
+  id                         String       @id @default(uuid())
+  userId                     String       @unique
+  user                       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 질환명 1: 만성질환 질환명 (다중 선택 가능)
+  // 선택지: 없음, 이상지질혈증, 고혈압, 당뇨, 골다공증, 만성콩팥병
+  chronicDiseases            String[]     @default([])
+  
+  // 질환명 1: 만성 호흡기 질환명 (다중 선택 가능)
+  // 선택지: 없음, 만성폐쇄성 폐질환, 기관지 천식, 특발성 폐섬유증, 결핵 후 폐 손상, 결핵 치료중
+  chronicRespiratoryDiseases String[]     @default([])
+  
+  // 질환명 1: 만성 호흡기 질환 기타
+  chronicRespiratoryOther    String?
+  
+  // 질환명 1: 만성 관절염 (다중 선택 가능)
+  // 선택지: 없음, 류마티스 관절염, 통풍, 기타
+  chronicArthritis           String[]     @default([])
+  
+  // 질환명 1: 골관절염 (고관절, 무릎, 손)
+  osteoarthritis             String?
+  
+  // 질환명 1: 만성 관절염 기타
+  chronicArthritisOther      String?
+  
+  // 질환명 2: 타질환 과거력 - 만성질환 (다중 선택 가능)
+  // 선택지: 없음, 심장질환, 간 질환, 뇌졸중/뇌출혈
+  pastChronicDiseases        String[]     @default([])
+  
+  // 질환명 2: 5년 내 암 과거력 (다중 선택 가능, 암 선택 시에만 표시)
+  // 선택지: 유방암, 폐암, 대장암, 간암, 위암
+  cancerHistory              String[]     @default([])
+  
+  // 질환명 2: 암 과거력 기타
+  cancerOther                String?
+  
+  // 질환명 2: 현재 흡연 여부 (필수)
+  // 선택지: 예, 아니요
+  isSmoking                  String?      // "YES" | "NO"
+  
+  // 질환명 2: 현재 음주 여부 (필수)
+  // 선택지: 예, 아니요
+  isDrinking                 String?      // "YES" | "NO"
+  
+  createdAt                  DateTime      @default(now())
+  updatedAt                  DateTime      @updatedAt
+  
+  @@map("disease_histories")
 }
 
 
