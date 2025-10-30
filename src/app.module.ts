@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { InstitutionConfigModule } from './institution-config/institution-config.module';
 import { EmailVerificationModule } from './email-verification/email-verification.module';
+import { HealthCheckupModule } from './health-checkup/health-checkup.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { EmailVerificationModule } from './email-verification/email-verification
     AuthModule,
     InstitutionConfigModule,
     EmailVerificationModule,
+    HealthCheckupModule,
   ],
   controllers: [AppController],
   providers: [AppService],

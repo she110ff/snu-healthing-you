@@ -12,25 +12,26 @@ datasource db {
 
 // 샘플 User 모델
 model User {
-  id               String    @id @default(uuid())
-  email            String    @unique
+  id               String          @id @default(uuid())
+  email            String          @unique
   password         String
   name             String?
-  role             String    @default("USER") // USER, ADMIN
-  emailVerified    Boolean   @default(false)
-  approvedByAdmin  Boolean   @default(false)
+  role             String          @default("USER") // USER, ADMIN
+  emailVerified    Boolean         @default(false)
+  approvedByAdmin  Boolean         @default(false)
   approvedAt       DateTime?
   approvedById     String?
-  approvedBy       User?     @relation("UserApprovals", fields: [approvedById], references: [id])
-  approvedUsers    User[]    @relation("UserApprovals")
-  dateOfBirth      DateTime? // 생년월일
-  gender           String?   // 성별 (MALE, FEMALE 등)
-  height           Float?    // 키 (cm)
-  weight           Float?    // 몸무게 (kg)
-  sido             String?   // 시도
-  guGun            String?   // 구군
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  approvedBy       User?           @relation("UserApprovals", fields: [approvedById], references: [id])
+  approvedUsers    User[]          @relation("UserApprovals")
+  dateOfBirth      DateTime?       // 생년월일
+  gender           String?         // 성별 (MALE, FEMALE 등)
+  height           Float?          // 키 (cm)
+  weight           Float?          // 몸무게 (kg)
+  sido             String?         // 시도
+  guGun            String?         // 구군
+  healthCheckups   HealthCheckup[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
   deletedAt        DateTime?
 
   @@map("users")
@@ -68,3 +69,55 @@ model InstitutionConfig {
 
   @@map("institution_configs")
 }
+
+// 건강검진 모델
+model HealthCheckup {
+  id                    String    @id @default(uuid())
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id])
+  checkupDate           DateTime? // 건강 검진일
+  
+  // 1. 체질량지수 (BMI)
+  bmi                   Float?
+  
+  // 2. 허리둘레 (cm)
+  waistCircumference    Float?
+  
+  // 3. 혈압
+  systolicBloodPressure Int?      // 수축기 혈압
+  diastolicBloodPressure Int?     // 이완기 혈압
+  
+  // 4. 총 콜레스테롤 (mg/dL)
+  totalCholesterol      Int?
+  
+  // 5. HDL 고밀도 지단백 (mg/dL) - 좋은 콜레스테롤
+  hdlCholesterol        Int?
+  
+  // 6. LDL 저밀도 지단백 (mg/dL) - 나쁜 콜레스테롤
+  ldlCholesterol        Int?
+  
+  // 7. 중성지방 트리글리세라이드 (mg/dL)
+  triglycerides         Int?
+  
+  // 8. 혈색소 (g/dL)
+  hemoglobin            Float?
+  
+  // 9. AST (GOT) - 간, 근육 등 손상 시 상승
+  ast                   Int?
+  
+  // 10. ALT (GPT) - 간 손상 시 상승
+  alt                   Int?
+  
+  // 11. 혈청크레아티닌 (mg/dL) - 신장 기능 저하 시 상승
+  serumCreatinine       Float?
+  
+  // 12. 신사구체여과율 (mL/min) - GFR, 신장 기능 저하 시 저하
+  glomerularFiltrationRate Float?
+  
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  @@map("health_checkups")
+}
+
+
