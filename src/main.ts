@@ -68,12 +68,6 @@ async function bootstrap() {
   SwaggerModule.setup(swaggerPath, app, document, {
     swaggerOptions: {
       persistAuthorization: true,
-      onComplete: () => {
-        // Swagger UI 로드 완료 후 커스텀 스크립트가 실행되도록 약간의 지연
-        setTimeout(() => {
-          console.log('Swagger UI loaded, custom script should execute');
-        }, 100);
-      },
     },
     customJs: '/swagger/swagger-ui-custom.js',
     customSiteTitle: swaggerTitle,
