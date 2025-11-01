@@ -18,6 +18,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
+    // Admin 로그인인 경우 (name 필드가 있음)
+    if (payload.name) {
+      const admin = await this.prisma.admin.findUnique({
+        where: { id: payload.sub },
+      });
+
+      if (!admin) {
+        throw new UnauthorizedException('관리자를 찾을 수 없습니다.');
+      }
+
+      return {
+        id: admin.id,
+        name: admin.name,
+      };
+    }
+
+    // User 로그인인 경우 (email 필드가 있음)
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
     });
@@ -30,7 +47,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
     };
   }
 }

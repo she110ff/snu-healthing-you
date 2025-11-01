@@ -24,39 +24,6 @@ async function main() {
 
   console.log('관리자(Admin) 생성 완료:', adminData);
 
-  // 관리자 사용자 생성
-  const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@snu.ac.kr' },
-    update: {
-      // 업데이트 시에도 상태 필드 유지
-      emailVerified: true,
-      approvedByAdmin: true,
-      approvedAt: new Date(),
-      approvedById: '59d70d42-639c-4d8f-92e9-cd659c1b03c0', // 자기 자신을 승인자로 설정
-    },
-    create: {
-      id: '59d70d42-639c-4d8f-92e9-cd659c1b03c0',
-      email: 'admin@snu.ac.kr',
-      password: '$2b$10$3qbKya2Vy7cQ8dKXqtUvzOD247FO45HVWRYetj73ML0XwD3c0WXQK',
-      name: '관리자',
-      role: 'ADMIN',
-      emailVerified: true, // 관리자는 이메일 인증 완료 상태
-      approvedByAdmin: true, // 관리자는 자동 승인 상태
-      approvedAt: new Date('2025-10-30T17:24:07.837Z'),
-      approvedById: '59d70d42-639c-4d8f-92e9-cd659c1b03c0', // 자기 자신을 승인자로 설정
-      dateOfBirth: new Date('1990-01-01'),
-      gender: 'MALE',
-      height: 175.0,
-      weight: 70.0,
-      sido: '서울특별시',
-      guGun: '관악구',
-      createdAt: new Date('2025-10-30T17:24:07.837Z'),
-      updatedAt: new Date('2025-10-30T17:24:07.837Z'),
-    },
-  });
-
-  console.log('관리자 사용자 생성 완료:', adminUser);
-
   // user2 생성
   const user2 = await prisma.user.upsert({
     where: { email: 'user2@snu.ac.kr' },
@@ -64,18 +31,17 @@ async function main() {
       emailVerified: true,
       approvedByAdmin: true,
       approvedAt: new Date(),
-      approvedById: adminUser.id,
+      approvedById: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', // 자기 자신을 승인자로 설정
     },
     create: {
       id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
       email: 'user2@snu.ac.kr',
       password: '$2b$10$3qbKya2Vy7cQ8dKXqtUvzOD247FO45HVWRYetj73ML0XwD3c0WXQK', // password: "password"
       name: '사용자2',
-      role: 'USER',
       emailVerified: true,
       approvedByAdmin: true,
       approvedAt: new Date(),
-      approvedById: adminUser.id,
+      approvedById: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', // 자기 자신을 승인자로 설정
       dateOfBirth: new Date('1985-05-15'),
       gender: 'FEMALE',
       height: 165.0,

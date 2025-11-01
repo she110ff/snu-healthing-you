@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { AdminGuard } from './guards/admin.guard';
 import { PrismaModule } from '../prisma/prisma.module';
 import { JwtModuleOptions } from '@nestjs/jwt';
 
@@ -27,8 +28,8 @@ import { JwtModuleOptions } from '@nestjs/jwt';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService, JwtModule],
+  providers: [AuthService, JwtStrategy, AdminGuard],
+  exports: [AuthService, JwtModule, AdminGuard],
 })
 export class AuthModule {}
 

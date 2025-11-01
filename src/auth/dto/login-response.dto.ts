@@ -14,14 +14,12 @@ export class LoginResponseDto {
       id: '123e4567-e89b-12d3-a456-426614174000',
       email: 'user@example.com',
       name: '홍길동',
-      role: 'USER',
     },
   })
   user: {
     id: string;
     email: string;
     name: string | null;
-    role: string;
   };
 }
 

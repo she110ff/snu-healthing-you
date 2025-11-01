@@ -33,7 +33,6 @@ model User {
   email            String          @unique
   password         String
   name             String?
-  role             String          @default("USER") // USER, ADMIN
   emailVerified    Boolean         @default(false)
   approvedByAdmin  Boolean         @default(false)
   approvedAt       DateTime?

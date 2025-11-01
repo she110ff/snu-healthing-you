@@ -4,12 +4,14 @@ import { UsersController } from './users.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { EmailVerificationModule } from '../email-verification/email-verification.module';
 import { OrganizationVerificationModule } from '../organization-verification/organization-verification.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     PrismaModule,
     EmailVerificationModule,
     OrganizationVerificationModule,
+    AuthModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],
