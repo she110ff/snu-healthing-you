@@ -8,6 +8,8 @@ import {
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { AdminLoginDto } from './dto/admin-login.dto';
+import { AdminLoginResponseDto } from './dto/admin-login-response.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -39,6 +41,35 @@ export class AuthController {
   })
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.login(loginDto);
+  }
+
+  @Post('admin/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '관리자 로그인',
+    description: '이름과 비밀번호로 관리자 로그인하여 JWT 토큰을 받습니다.',
+  })
+  @ApiBody({
+    type: AdminLoginDto,
+    description: '관리자 로그인 정보',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '관리자 로그인 성공',
+    type: AdminLoginResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패 - 잘못된 이름 또는 비밀번호',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '관리자를 찾을 수 없습니다.',
+  })
+  async adminLogin(
+    @Body() adminLoginDto: AdminLoginDto,
+  ): Promise<AdminLoginResponseDto> {
+    return this.authService.adminLogin(adminLoginDto);
   }
 }
 

@@ -1,12 +1,31 @@
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('시드 데이터 생성 시작...');
 
+  // 관리자(Admin) 생성
+  const adminPassword = await bcrypt.hash('password', 10);
+  const adminData = await prisma.admin.upsert({
+    where: { name: '관리자' },
+    update: {
+      password: adminPassword,
+    },
+    create: {
+      id: 'admin-123e4567-e89b-12d3-a456-426614174000',
+      name: '관리자',
+      password: adminPassword,
+      createdAt: new Date('2025-10-30T17:24:07.837Z'),
+      updatedAt: new Date('2025-10-30T17:24:07.837Z'),
+    },
+  });
+
+  console.log('관리자(Admin) 생성 완료:', adminData);
+
   // 관리자 사용자 생성
-  const admin = await prisma.user.upsert({
+  const adminUser = await prisma.user.upsert({
     where: { email: 'admin@snu.ac.kr' },
     update: {
       // 업데이트 시에도 상태 필드 유지
@@ -36,7 +55,7 @@ async function main() {
     },
   });
 
-  console.log('관리자 사용자 생성 완료:', admin);
+  console.log('관리자 사용자 생성 완료:', adminUser);
 
   // user2 생성
   const user2 = await prisma.user.upsert({
@@ -45,7 +64,7 @@ async function main() {
       emailVerified: true,
       approvedByAdmin: true,
       approvedAt: new Date(),
-      approvedById: admin.id,
+      approvedById: adminUser.id,
     },
     create: {
       id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
@@ -56,7 +75,7 @@ async function main() {
       emailVerified: true,
       approvedByAdmin: true,
       approvedAt: new Date(),
-      approvedById: admin.id,
+      approvedById: adminUser.id,
       dateOfBirth: new Date('1985-05-15'),
       gender: 'FEMALE',
       height: 165.0,
