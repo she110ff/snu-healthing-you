@@ -95,6 +95,20 @@ export class InstitutionConfigService {
 
     const updateData: any = {};
 
+    // name이 있는 경우 업데이트 (중복 체크 포함)
+    if (updateDto.name !== undefined) {
+      // 다른 기관에 같은 이름이 있는지 확인
+      const existingByName = await this.prisma.institutionConfig.findUnique({
+        where: { name: updateDto.name },
+      });
+      if (existingByName && existingByName.id !== id) {
+        throw new ConflictException(
+          `기관명 '${updateDto.name}'이 이미 존재합니다.`,
+        );
+      }
+      updateData.name = updateDto.name;
+    }
+
     // pointPoolTotal이 있는 경우만 업데이트
     if (updateDto.pointPoolTotal !== undefined) {
       const newPointPoolTotal = BigInt(updateDto.pointPoolTotal);

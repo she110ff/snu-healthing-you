@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateHealthCheckupDto } from './dto/create-health-checkup.dto';
@@ -19,6 +20,15 @@ export class HealthCheckupService {
     userId: string,
     createHealthCheckupDto: CreateHealthCheckupDto,
   ): Promise<HealthCheckupResponseDto> {
+    // 빈 객체 체크: 최소한 하나의 필드는 있어야 함
+    const hasAnyData = Object.keys(createHealthCheckupDto).some(
+      (key) => createHealthCheckupDto[key] !== undefined && createHealthCheckupDto[key] !== null,
+    );
+
+    if (!hasAnyData) {
+      throw new BadRequestException('건강검진 기록에는 최소한 하나의 데이터가 필요합니다.');
+    }
+
     const { checkupDate, ...data } = createHealthCheckupDto;
 
     return this.prisma.healthCheckup.create({

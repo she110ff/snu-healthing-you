@@ -73,7 +73,7 @@ describe('Institution Config Admin (e2e)', () => {
           .expect(200)
           .expect((res) => {
             expect(res.body).toHaveProperty('id');
-            expect(res.body).toHaveProperty('institutionName');
+            expect(res.body).toHaveProperty('name');
           });
       }
     });
@@ -89,8 +89,14 @@ describe('Institution Config Admin (e2e)', () => {
   describe('POST /api/v1/admin/institution-config', () => {
     it('[관리자] 기관 설정 생성 성공', async () => {
       const createData = {
-        institutionName: `테스트기관_${Date.now()}`,
-        emailDomain: `test${Date.now()}.ac.kr`,
+        name: `테스트기관_${Date.now()}`,
+        emailForm: `test${Date.now()}.ac.kr`,
+        pointPoolTotal: '1000000000',
+        pointLimitPerUser: 25000,
+        affiliationCodes: [
+          { code: 'SNU01', name: '교원' },
+          { code: 'SNU02', name: '교직원' },
+        ],
       };
 
       const response = await request(app.getHttpServer())
@@ -100,21 +106,43 @@ describe('Institution Config Admin (e2e)', () => {
         .expect(201);
 
       expect(response.body).toHaveProperty('id');
-      expect(response.body).toHaveProperty('institutionName', createData.institutionName);
+      expect(response.body).toHaveProperty('name', createData.name);
       createdConfigId = response.body.id;
     });
 
     it('중복된 기관명으로 생성 시도 시 실패', async () => {
-      // 이미 존재하는 기관명 사용
-      const createData = {
-        institutionName: '서울대학교',
-        emailDomain: 'duplicate.ac.kr',
+      // 먼저 기관을 생성
+      const firstCreateData = {
+        name: `중복테스트기관_${Date.now()}`,
+        emailForm: `duplicate1${Date.now()}.ac.kr`,
+        pointPoolTotal: '1000000000',
+        pointLimitPerUser: 25000,
+        affiliationCodes: [
+          { code: 'SNU01', name: '교원' },
+        ],
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/v1/admin/institution-config')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(firstCreateData)
+        .expect(201);
+
+      // 같은 기관명으로 다시 생성 시도 (중복)
+      const duplicateData = {
+        name: firstCreateData.name,
+        emailForm: `duplicate2${Date.now()}.ac.kr`,
+        pointPoolTotal: '1000000000',
+        pointLimitPerUser: 25000,
+        affiliationCodes: [
+          { code: 'SNU01', name: '교원' },
+        ],
       };
 
       return request(app.getHttpServer())
         .post('/api/v1/admin/institution-config')
         .set('Authorization', `Bearer ${adminToken}`)
-        .send(createData)
+        .send(duplicateData)
         .expect(409);
     });
 
@@ -131,8 +159,13 @@ describe('Institution Config Admin (e2e)', () => {
         .post('/api/v1/admin/institution-config')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
-          institutionName: '테스트기관',
-          emailDomain: 'test.ac.kr',
+          name: '테스트기관',
+          emailForm: 'test.ac.kr',
+          pointPoolTotal: '1000000000',
+          pointLimitPerUser: 25000,
+          affiliationCodes: [
+            { code: 'SNU01', name: '교원' },
+          ],
         })
         .expect(403);
     });
@@ -146,7 +179,7 @@ describe('Institution Config Admin (e2e)', () => {
       }
 
       const updateData = {
-        institutionName: `수정된기관_${Date.now()}`,
+        name: `수정된기관_${Date.now()}`,
       };
 
       return request(app.getHttpServer())
@@ -155,7 +188,7 @@ describe('Institution Config Admin (e2e)', () => {
         .send(updateData)
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('institutionName', updateData.institutionName);
+          expect(res.body).toHaveProperty('name', updateData.name);
         });
     });
 
@@ -163,7 +196,7 @@ describe('Institution Config Admin (e2e)', () => {
       return request(app.getHttpServer())
         .patch(`/api/v1/admin/institution-config/${commonFixtures.uuids.nonExistent}`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ institutionName: '수정된기관' })
+        .send({ name: '수정된기관' })
         .expect(404);
     });
   });
@@ -175,8 +208,14 @@ describe('Institution Config Admin (e2e)', () => {
         .post('/api/v1/admin/institution-config')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          institutionName: `삭제테스트기관_${Date.now()}`,
-          emailDomain: `deletetest${Date.now()}.ac.kr`,
+          name: `삭제테스트기관_${Date.now()}`,
+          emailForm: `deletetest${Date.now()}.ac.kr`,
+          pointPoolTotal: '1000000000',
+          pointLimitPerUser: 25000,
+          affiliationCodes: [
+            { code: 'SNU01', name: '교원' },
+            { code: 'SNU02', name: '교직원' },
+          ],
         })
         .expect(201);
 
