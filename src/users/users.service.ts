@@ -62,7 +62,7 @@ export class UsersService {
         password: hashedPassword,
         emailVerified: true,
         approvedByAdmin: false,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        dateOfBirth: new Date(dateOfBirth),
       },
       select: {
         id: true,
@@ -95,7 +95,7 @@ export class UsersService {
         password: hashedPassword,
         emailVerified: true,
         approvedByAdmin: false,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        dateOfBirth: new Date(dateOfBirth),
       },
       select: {
         id: true,
