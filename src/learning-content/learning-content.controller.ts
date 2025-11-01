@@ -38,7 +38,7 @@ import { UpdateStepDto } from './dto/update-step.dto';
 import { StepResponseDto } from './dto/step-response.dto';
 
 @ApiTags('learning-content')
-@Controller('admin/learning-content')
+@Controller('learning-content')
 @UseGuards(JwtAuthGuard, AdminGuard)
 @ApiBearerAuth('bearer')
 export class LearningContentController {
@@ -144,7 +144,10 @@ export class LearningContentController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDto: UpdateLearningContentGroupDto,
   ): Promise<LearningContentGroupResponseDto> {
-    return this.learningContentService.updateLearningContentGroup(id, updateDto);
+    return this.learningContentService.updateLearningContentGroup(
+      id,
+      updateDto,
+    );
   }
 
   @Delete('groups/:id')
@@ -192,7 +195,9 @@ export class LearningContentController {
   @ApiUnauthorizedResponse({
     description: '인증이 필요하거나 관리자 권한이 필요합니다.',
   })
-  async createTopic(@Body() createDto: CreateTopicDto): Promise<TopicResponseDto> {
+  async createTopic(
+    @Body() createDto: CreateTopicDto,
+  ): Promise<TopicResponseDto> {
     return this.learningContentService.createTopic(createDto);
   }
 
@@ -545,4 +550,3 @@ export class LearningContentController {
     return this.learningContentService.removeStep(id);
   }
 }
-
