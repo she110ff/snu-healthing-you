@@ -31,10 +31,8 @@ model User {
   gender            String
   height            Float
   weight            Float
-  sido              String
-  guGun             String
-  sidoCode          String?
-  guGunCode         String?
+  sidoCode          String
+  guGunCode         String
   diseaseHistory    DiseaseHistory?
   healthCheckups    HealthCheckup[]
   userInterestGroup UserInterestGroup?
@@ -42,8 +40,8 @@ model User {
   dailyLearningSessions DailyLearningSession[]
   approvedBy        User?                @relation("UserApprovals", fields: [approvedById], references: [id])
   approvedUsers     User[]               @relation("UserApprovals")
-  sidoRegion        Region?              @relation("UserSido", fields: [sidoCode], references: [code])
-  guGunRegionDetail RegionDetail?        @relation("UserGuGun", fields: [guGunCode], references: [code])
+  sidoRegion        Region               @relation("UserSido", fields: [sidoCode], references: [code])
+  guGunRegionDetail RegionDetail         @relation("UserGuGun", fields: [guGunCode], references: [code])
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
   deletedAt         DateTime?

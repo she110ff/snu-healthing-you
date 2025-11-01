@@ -27,8 +27,8 @@ CREATE TABLE "users" (
     "gender" TEXT NOT NULL,
     "height" DOUBLE PRECISION NOT NULL,
     "weight" DOUBLE PRECISION NOT NULL,
-    "sido" TEXT NOT NULL,
-    "guGun" TEXT NOT NULL,
+    "sidoCode" TEXT NOT NULL,
+    "guGunCode" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -188,6 +188,60 @@ CREATE TABLE "step_content_items" (
     CONSTRAINT "step_content_items_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "user_learning_progress" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "learningContentGroupId" TEXT NOT NULL,
+    "currentTopicId" TEXT,
+    "currentContentId" TEXT,
+    "currentStepId" TEXT,
+    "isCompleted" BOOLEAN NOT NULL DEFAULT false,
+    "completedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "user_learning_progress_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "daily_learning_sessions" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "learningContentGroupId" TEXT NOT NULL,
+    "userProgressId" TEXT NOT NULL,
+    "sessionDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "topicsCompleted" INTEGER NOT NULL DEFAULT 0,
+    "contentsCompleted" INTEGER NOT NULL DEFAULT 0,
+    "stepsCompleted" INTEGER NOT NULL DEFAULT 0,
+    "lastLearningAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "daily_learning_sessions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "regions" (
+    "code" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "regions_pkey" PRIMARY KEY ("code")
+);
+
+-- CreateTable
+CREATE TABLE "region_details" (
+    "code" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "regionCode" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "region_details_pkey" PRIMARY KEY ("code")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "admins_name_key" ON "admins"("name");
 
@@ -209,8 +263,23 @@ CREATE UNIQUE INDEX "disease_histories_userId_key" ON "disease_histories"("userI
 -- CreateIndex
 CREATE UNIQUE INDEX "user_interest_groups_userId_key" ON "user_interest_groups"("userId");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "user_learning_progress_userId_learningContentGroupId_key" ON "user_learning_progress"("userId", "learningContentGroupId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "daily_learning_sessions_userId_learningContentGroupId_sessi_key" ON "daily_learning_sessions"("userId", "learningContentGroupId", "sessionDate");
+
+-- CreateIndex
+CREATE INDEX "region_details_regionCode_idx" ON "region_details"("regionCode");
+
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_approvedById_fkey" FOREIGN KEY ("approvedById") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "users" ADD CONSTRAINT "users_sidoCode_fkey" FOREIGN KEY ("sidoCode") REFERENCES "regions"("code") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "users" ADD CONSTRAINT "users_guGunCode_fkey" FOREIGN KEY ("guGunCode") REFERENCES "region_details"("code") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "health_checkups" ADD CONSTRAINT "health_checkups_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -235,3 +304,30 @@ ALTER TABLE "steps" ADD CONSTRAINT "steps_contentId_fkey" FOREIGN KEY ("contentI
 
 -- AddForeignKey
 ALTER TABLE "step_content_items" ADD CONSTRAINT "step_content_items_stepId_fkey" FOREIGN KEY ("stepId") REFERENCES "steps"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_learning_progress" ADD CONSTRAINT "user_learning_progress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_learning_progress" ADD CONSTRAINT "user_learning_progress_learningContentGroupId_fkey" FOREIGN KEY ("learningContentGroupId") REFERENCES "learning_content_groups"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_learning_progress" ADD CONSTRAINT "user_learning_progress_currentTopicId_fkey" FOREIGN KEY ("currentTopicId") REFERENCES "topics"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_learning_progress" ADD CONSTRAINT "user_learning_progress_currentContentId_fkey" FOREIGN KEY ("currentContentId") REFERENCES "contents"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_learning_progress" ADD CONSTRAINT "user_learning_progress_currentStepId_fkey" FOREIGN KEY ("currentStepId") REFERENCES "steps"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "daily_learning_sessions" ADD CONSTRAINT "daily_learning_sessions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "daily_learning_sessions" ADD CONSTRAINT "daily_learning_sessions_learningContentGroupId_fkey" FOREIGN KEY ("learningContentGroupId") REFERENCES "learning_content_groups"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "daily_learning_sessions" ADD CONSTRAINT "daily_learning_sessions_userProgressId_fkey" FOREIGN KEY ("userProgressId") REFERENCES "user_learning_progress"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "region_details" ADD CONSTRAINT "region_details_regionCode_fkey" FOREIGN KEY ("regionCode") REFERENCES "regions"("code") ON DELETE CASCADE ON UPDATE CASCADE;

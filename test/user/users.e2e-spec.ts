@@ -204,8 +204,8 @@ describe('Users (e2e)', () => {
         const userId = listResponse.body[0].id;
         const updateData = {
           weight: 75.5,
-          sido: '부산광역시',
-          guGun: '해운대구',
+          sidoCode: '26',
+          guGunCode: '26350',
         };
 
         return request(app.getHttpServer())
@@ -215,8 +215,8 @@ describe('Users (e2e)', () => {
           .expect(200)
           .expect((res) => {
             expect(res.body).toHaveProperty('weight', updateData.weight);
-            expect(res.body).toHaveProperty('sido', updateData.sido);
-            expect(res.body).toHaveProperty('guGun', updateData.guGun);
+            expect(res.body).toHaveProperty('sidoCode', updateData.sidoCode);
+            expect(res.body).toHaveProperty('guGunCode', updateData.guGunCode);
           });
       }
     });

@@ -336,8 +336,6 @@ async function main() {
       gender: 'FEMALE',
       height: 165.0,
       weight: 60.0,
-      sido: '서울특별시',
-      guGun: '강남구',
       sidoCode: '11',
       guGunCode: '11680',
       createdAt: new Date('2025-10-30T18:00:00.000Z'),

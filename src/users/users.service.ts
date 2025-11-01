@@ -62,10 +62,6 @@ export class UsersService {
 
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-    // 지역 이름 조회
-    const sidoName = await this.regionCodeService.getRegionNameByCode(sidoCode);
-    const guGunName = await this.regionCodeService.getRegionDetailNameByCode(guGunCode);
-
     return this.prisma.user.create({
       data: {
         ...userData,
@@ -75,8 +71,6 @@ export class UsersService {
         dateOfBirth: new Date(dateOfBirth),
         sidoCode,
         guGunCode,
-        sido: sidoName || '',
-        guGun: guGunName || '',
       },
       include: {
         sidoRegion: true,
@@ -101,10 +95,6 @@ export class UsersService {
     
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-    // 지역 이름 조회
-    const sidoName = await this.regionCodeService.getRegionNameByCode(sidoCode);
-    const guGunName = await this.regionCodeService.getRegionDetailNameByCode(guGunCode);
-
     return this.prisma.user.create({
       data: {
         ...userData,
@@ -114,8 +104,6 @@ export class UsersService {
         dateOfBirth: new Date(dateOfBirth),
         sidoCode,
         guGunCode,
-        sido: sidoName || '',
-        guGun: guGunName || '',
       },
       include: {
         sidoRegion: true,
@@ -221,15 +209,11 @@ export class UsersService {
     }
     if (updateUserDto.sidoCode !== undefined) {
       await this.regionCodeService.validateRegionCode(updateUserDto.sidoCode);
-      const sidoName = await this.regionCodeService.getRegionNameByCode(updateUserDto.sidoCode);
       updateData.sidoCode = updateUserDto.sidoCode;
-      updateData.sido = sidoName || '';
     }
     if (updateUserDto.guGunCode !== undefined) {
       await this.regionCodeService.validateRegionDetailCode(updateUserDto.guGunCode);
-      const guGunName = await this.regionCodeService.getRegionDetailNameByCode(updateUserDto.guGunCode);
       updateData.guGunCode = updateUserDto.guGunCode;
-      updateData.guGun = guGunName || '';
     }
 
     return this.prisma.user.update({

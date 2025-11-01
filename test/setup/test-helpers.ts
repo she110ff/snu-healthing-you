@@ -91,8 +91,8 @@ export async function createUnapprovedTestUser(
       gender: 'MALE',
       height: 175.0,
       weight: 70.0,
-      sido: '서울특별시',
-      guGun: '강남구',
+      sidoCode: '11',
+      guGunCode: '11680',
     },
   });
 }
@@ -141,8 +141,8 @@ export async function createTestUser(
       gender: 'MALE',
       height: 175.0,
       weight: 70.0,
-      sido: '서울특별시',
-      guGun: '강남구',
+      sidoCode: '11',
+      guGunCode: '11680',
     },
   });
 

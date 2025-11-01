@@ -7,8 +7,8 @@ export const userFixtures = {
     gender: 'FEMALE',
     height: 165.0,
     weight: 60.0,
-    sido: '서울특별시',
-    guGun: '강남구',
+    sidoCode: '11',
+    guGunCode: '11680',
   },
   new: {
     email: 'newuser@snu.ac.kr',
@@ -19,8 +19,8 @@ export const userFixtures = {
     gender: 'MALE',
     height: 175.0,
     weight: 70.0,
-    sido: '서울특별시',
-    guGun: '종로구',
+    sidoCode: '11',
+    guGunCode: '11110',
     organizationCode: 'SNU01',
   },
   invalid: {

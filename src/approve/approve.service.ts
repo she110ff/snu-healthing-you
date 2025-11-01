@@ -65,8 +65,16 @@ export class ApproveService {
         gender: true,
         height: true,
         weight: true,
-        sido: true,
-        guGun: true,
+        sidoRegion: {
+          select: {
+            name: true,
+          },
+        },
+        guGunRegionDetail: {
+          select: {
+            name: true,
+          },
+        },
         createdAt: true,
         updatedAt: true,
       },
@@ -79,8 +87,8 @@ export class ApproveService {
       gender: updatedUser.gender ?? undefined,
       height: updatedUser.height ?? undefined,
       weight: updatedUser.weight ?? undefined,
-      sido: updatedUser.sido ?? undefined,
-      guGun: updatedUser.guGun ?? undefined,
+      sido: updatedUser.sidoRegion?.name ?? undefined,
+      guGun: updatedUser.guGunRegionDetail?.name ?? undefined,
       approvedAt: updatedUser.approvedAt!,
       approvedById: updatedUser.approvedById ?? null,
     };
