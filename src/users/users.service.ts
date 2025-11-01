@@ -5,7 +5,6 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { EmailVerificationService } from '../email-verification/email-verification.service';
 import { OrganizationVerificationService } from '../organization-verification/organization-verification.service';
 import { RegionCodeService } from '../region-code/region-code.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -13,34 +12,27 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { DeleteUserResponseDto } from './dto/delete-user-response.dto';
 import { UserStatusResponseDto } from './dto/user-status-response.dto';
 import * as bcrypt from 'bcrypt';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: PrismaService,
-    private emailVerificationService: EmailVerificationService,
     private organizationVerificationService: OrganizationVerificationService,
     private regionCodeService: RegionCodeService,
   ) {}
 
   /**
-   * 회원가입 (이메일 인증 포함)
+   * 회원가입
    */
   async register(createUserDto: CreateUserDto) {
     const {
-      verificationCode,
       organizationCode,
       dateOfBirth,
       sidoCode,
       guGunCode,
       ...userData
     } = createUserDto;
-
-    // 이메일 인증코드 검증
-    await this.emailVerificationService.verifyCode({
-      email: userData.email,
-      code: verificationCode,
-    });
 
     // 조직 코드 검증
     this.organizationVerificationService.verifyOrganizationCode(
@@ -51,43 +43,46 @@ export class UsersService {
     await this.regionCodeService.validateRegionCode(sidoCode);
     await this.regionCodeService.validateRegionDetailCode(guGunCode);
 
-    // 이미 가입된 사용자 확인
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: userData.email },
-    });
-
-    if (existingUser && !existingUser.deletedAt) {
-      throw new ConflictException('이미 가입된 이메일입니다.');
-    }
-
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-    return this.prisma.user.create({
-      data: {
-        ...userData,
-        password: hashedPassword,
-        emailVerified: true,
-        approvedByAdmin: false,
-        dateOfBirth: new Date(dateOfBirth),
-        sidoCode,
-        guGunCode,
-      },
-      include: {
-        sidoRegion: true,
-        guGunRegionDetail: {
-          include: {
-            region: true,
+    try {
+      return await this.prisma.user.create({
+        data: {
+          ...userData,
+          password: hashedPassword,
+          emailVerified: true,
+          approvedByAdmin: false,
+          dateOfBirth: new Date(dateOfBirth),
+          sidoCode,
+          guGunCode,
+        },
+        include: {
+          sidoRegion: true,
+          guGunRegionDetail: {
+            include: {
+              region: true,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (error) {
+      // 이메일 중복 에러 처리 (Prisma unique constraint)
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2002' &&
+        error.meta?.target?.includes('email')
+      ) {
+        throw new ConflictException('이미 가입된 이메일입니다.');
+      }
+      throw error;
+    }
   }
 
   /**
    * 사용자 생성 (내부 사용, 관리자용)
    */
   async create(createUserDto: CreateUserDto) {
-    const { verificationCode, dateOfBirth, sidoCode, guGunCode, ...userData } = createUserDto;
+    const { dateOfBirth, sidoCode, guGunCode, ...userData } = createUserDto;
     
     // 지역 코드 검증
     await this.regionCodeService.validateRegionCode(sidoCode);

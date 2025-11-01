@@ -34,14 +34,14 @@ export class UsersController {
   @Post('register')
   @ApiOperation({
     summary: '회원가입',
-    description: '이메일 인증코드를 포함하여 새 사용자를 등록합니다.',
+    description: '새 사용자를 등록합니다.',
   })
   @ApiResponse({
     status: 201,
     description: '회원가입이 성공적으로 완료되었습니다.',
   })
   @ApiBadRequestResponse({
-    description: '잘못된 요청입니다. (인증코드 오류 등)',
+    description: '잘못된 요청입니다.',
   })
   @ApiConflictResponse({
     description: '이미 가입된 이메일입니다.',

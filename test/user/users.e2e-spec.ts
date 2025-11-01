@@ -78,18 +78,14 @@ describe('Users (e2e)', () => {
       const testEmail = `newuser${Date.now()}@snu.ac.kr`;
 
       // 먼저 이메일 인증코드 발급
-      const sendCodeResponse = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post('/api/v1/email-verification/send-code')
         .send({ email: testEmail })
         .expect(200);
 
-      // 발급된 인증코드 사용 (개발 환경에서는 응답에 포함됨)
-      const verificationCode = sendCodeResponse.body.code || '123456';
-
       const registerData = {
         ...userFixtures.new,
         email: testEmail,
-        verificationCode,
       };
 
       return request(app.getHttpServer())
@@ -99,42 +95,22 @@ describe('Users (e2e)', () => {
     });
 
     it('이미 가입된 이메일로 회원가입 시도 시 실패', async () => {
-      // 이미 가입된 이메일에 대해서는 인증코드 발급 단계에서 409가 반환되어야 하지만,
-      // 만약 인증코드가 있다면 회원가입 단계에서 체크됨
-      // 여기서는 인증코드 검증이 먼저 실행되어 400이 반환될 수 있음
-      // 실제로는 이메일 발급 단계에서 409를 반환하므로 이 테스트는 인증코드 없이 시도
+      // 이미 가입된 이메일로 회원가입 시도 시 Prisma unique constraint 에러가 발생하고
+      // 이를 409 ConflictException으로 변환하여 반환
       return request(app.getHttpServer())
         .post('/api/v1/users/register')
         .send({
           email: userFixtures.existing.email,
           password: userFixtures.new.password,
-          verificationCode: '000000', // 존재하지 않는 인증코드
           organizationCode: userFixtures.new.organizationCode,
+          dateOfBirth: userFixtures.new.dateOfBirth,
+          gender: userFixtures.new.gender,
+          height: userFixtures.new.height,
+          weight: userFixtures.new.weight,
+          sidoCode: userFixtures.new.sidoCode,
+          guGunCode: userFixtures.new.guGunCode,
         })
-        .expect((res) => {
-          // 인증코드 검증 실패 시 401, 또는 중복 이메일 체크가 먼저 실행되면 409
-          expect([400, 401, 409]).toContain(res.status);
-        });
-    });
-
-    it('잘못된 인증코드로 회원가입 시도 시 실패', async () => {
-      const testEmail = `invalidcode${Date.now()}@snu.ac.kr`;
-
-      // 먼저 올바른 인증코드 발급
-      await request(app.getHttpServer())
-        .post('/api/v1/email-verification/send-code')
-        .send({ email: testEmail })
-        .expect(200);
-
-      // 잘못된 인증코드로 회원가입 시도
-      return request(app.getHttpServer())
-        .post('/api/v1/users/register')
-        .send({
-          ...userFixtures.new,
-          email: testEmail,
-          verificationCode: commonFixtures.emailVerification.invalidCode,
-        })
-        .expect(401); // 인증코드 검증 실패 시 UnauthorizedException (401)
+        .expect(409); // 이메일 중복 에러
     });
 
     it('필수 필드 누락 시 실패', () => {
@@ -148,13 +124,10 @@ describe('Users (e2e)', () => {
       const testEmail = `invalidsido${Date.now()}@snu.ac.kr`;
 
       // 먼저 이메일 인증코드 발급
-      const sendCodeResponse = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post('/api/v1/email-verification/send-code')
         .send({ email: testEmail })
         .expect(200);
-
-      // 발급된 인증코드 사용
-      const verificationCode = sendCodeResponse.body.code || '123456';
 
       // 유효하지 않은 시도 코드(99)로 회원가입 시도
       return request(app.getHttpServer())
@@ -162,7 +135,6 @@ describe('Users (e2e)', () => {
         .send({
           ...userFixtures.new,
           email: testEmail,
-          verificationCode,
           sidoCode: '99', // 존재하지 않는 시도 코드
         })
         .expect(400)
@@ -175,13 +147,10 @@ describe('Users (e2e)', () => {
       const testEmail = `invalidgugun${Date.now()}@snu.ac.kr`;
 
       // 먼저 이메일 인증코드 발급
-      const sendCodeResponse = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post('/api/v1/email-verification/send-code')
         .send({ email: testEmail })
         .expect(200);
-
-      // 발급된 인증코드 사용
-      const verificationCode = sendCodeResponse.body.code || '123456';
 
       // 유효하지 않은 시군구 코드(99999)로 회원가입 시도
       return request(app.getHttpServer())
@@ -189,7 +158,6 @@ describe('Users (e2e)', () => {
         .send({
           ...userFixtures.new,
           email: testEmail,
-          verificationCode,
           guGunCode: '99999', // 존재하지 않는 시군구 코드
         })
         .expect(400)

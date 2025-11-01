@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsString,
   MinLength,
-  Length,
   IsDateString,
   IsEnum,
   IsIn,
@@ -41,17 +40,6 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   name?: string;
-
-  @ApiProperty({
-    description: '이메일 인증코드',
-    example: '123456',
-    minLength: 6,
-    maxLength: 6,
-  })
-  @IsString()
-  @IsNotEmpty()
-  @Length(6, 6)
-  verificationCode: string;
 
   @ApiProperty({
     description: '조직 코드 (SNU01 또는 SNU02)',

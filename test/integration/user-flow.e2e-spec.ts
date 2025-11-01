@@ -8,7 +8,6 @@ describe('User Flow Integration (e2e)', () => {
   let adminToken: string;
   const testEmail = `testuser${Date.now()}@snu.ac.kr`;
   const testPassword = 'password123';
-  let verificationCode: string;
   let userId: string;
 
   beforeAll(async () => {
@@ -52,7 +51,6 @@ describe('User Flow Integration (e2e)', () => {
           email: testEmail,
           password: testPassword,
           name: '테스트사용자',
-          emailVerificationCode: '123456', // 실제 코드 사용 필요
           dateOfBirth: '1990-01-01',
           gender: 'MALE',
           height: 175.0,

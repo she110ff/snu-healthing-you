@@ -14,7 +14,6 @@ export const userFixtures = {
     email: 'newuser@snu.ac.kr',
     password: 'password123',
     name: '새사용자',
-    verificationCode: '123456',
     dateOfBirth: '1990-01-01',
     gender: 'MALE',
     height: 175.0,
