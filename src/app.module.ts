@@ -11,6 +11,7 @@ import { OrganizationVerificationModule } from './organization-verification/orga
 import { HealthCheckupModule } from './health-checkup/health-checkup.module';
 import { DiseaseHistoryModule } from './disease-history/disease-history.module';
 import { InterestGroupModule } from './interest-group/interest-group.module';
+import { ApproveModule } from './approve/approve.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { InterestGroupModule } from './interest-group/interest-group.module';
     HealthCheckupModule,
     DiseaseHistoryModule,
     InterestGroupModule,
+    ApproveModule,
   ],
   controllers: [AppController],
   providers: [AppService],
