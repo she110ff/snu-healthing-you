@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailVerificationService } from '../email-verification/email-verification.service';
+import { OrganizationVerificationService } from '../organization-verification/organization-verification.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DeleteUserResponseDto } from './dto/delete-user-response.dto';
@@ -24,19 +25,30 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private emailVerificationService: EmailVerificationService,
+    private organizationVerificationService: OrganizationVerificationService,
   ) {}
 
   /**
    * 회원가입 (이메일 인증 포함)
    */
   async register(createUserDto: CreateUserDto) {
-    const { verificationCode, dateOfBirth, ...userData } = createUserDto;
+    const {
+      verificationCode,
+      organizationCode,
+      dateOfBirth,
+      ...userData
+    } = createUserDto;
 
     // 이메일 인증코드 검증
     await this.emailVerificationService.verifyCode({
       email: userData.email,
       code: verificationCode,
     });
+
+    // 조직 코드 검증
+    this.organizationVerificationService.verifyOrganizationCode(
+      organizationCode,
+    );
 
     // 이미 가입된 사용자 확인
     const existingUser = await this.prisma.user.findUnique({

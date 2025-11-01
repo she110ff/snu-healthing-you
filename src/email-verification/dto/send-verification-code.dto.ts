@@ -10,4 +10,3 @@ export class SendVerificationCodeDto {
   @IsNotEmpty()
   email: string;
 }
-

@@ -1,4 +1,17 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, Length, IsDateString, IsEnum, IsNumber, Min, Max } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+  Length,
+  IsDateString,
+  IsEnum,
+  IsIn,
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
@@ -39,6 +52,16 @@ export class CreateUserDto {
   @IsNotEmpty()
   @Length(6, 6)
   verificationCode: string;
+
+  @ApiProperty({
+    description: '조직 코드 (SNU01 또는 SNU02)',
+    example: 'SNU01',
+    enum: ['SNU01', 'SNU02'],
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsIn(['SNU01', 'SNU02'])
+  organizationCode: string;
 
   @ApiProperty({
     description: '생년월일',

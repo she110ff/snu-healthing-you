@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { InstitutionConfigModule } from './institution-config/institution-config.module';
 import { EmailVerificationModule } from './email-verification/email-verification.module';
+import { OrganizationVerificationModule } from './organization-verification/organization-verification.module';
 import { HealthCheckupModule } from './health-checkup/health-checkup.module';
 import { DiseaseHistoryModule } from './disease-history/disease-history.module';
 import { InterestGroupModule } from './interest-group/interest-group.module';
@@ -23,6 +24,7 @@ import { InterestGroupModule } from './interest-group/interest-group.module';
     AuthModule,
     InstitutionConfigModule,
     EmailVerificationModule,
+    OrganizationVerificationModule,
     HealthCheckupModule,
     DiseaseHistoryModule,
     InterestGroupModule,
