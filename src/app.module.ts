@@ -12,6 +12,7 @@ import { HealthCheckupModule } from './health-checkup/health-checkup.module';
 import { DiseaseHistoryModule } from './disease-history/disease-history.module';
 import { InterestGroupModule } from './interest-group/interest-group.module';
 import { ApproveModule } from './approve/approve.module';
+import { LearningContentModule } from './learning-content/learning-content.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ApproveModule } from './approve/approve.module';
     DiseaseHistoryModule,
     InterestGroupModule,
     ApproveModule,
+    LearningContentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -187,4 +187,100 @@ model InterestGroup {
   @@map("interest_groups")
 }
 
+// -------------------------------------------
+// 4. 학습 컨텐츠 모델 (관리자 관리)
+// -------------------------------------------
+
+enum ContentItemType {
+  SPEECH_BUBBLE    // 말풍선
+  TEXT             // 텍스트
+  IMAGE            // 이미지
+  DATE             // 날짜
+  LABEL_TEXT_FIELD // 레이블+텍스트필드
+  CHECKBOX         // 체크박스
+  QNA              // 문답
+}
+
+// 학습 컨텐츠 관심 그룹 모델
+model LearningContentGroup {
+  id          String   @id @default(uuid())
+  name        String   // 그룹명 (예: "당뇨 관리 그룹", "고혈압 관리 그룹")
+  description String?  // 설명
+  topics      Topic[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@map("learning_content_groups")
+}
+
+// 주제 모델
+model Topic {
+  id                      String    @id @default(uuid())
+  learningContentGroupId  String    // 소속 그룹 ID
+  learningContentGroup    LearningContentGroup @relation(fields: [learningContentGroupId], references: [id], onDelete: Cascade)
+  title                   String    // 주제 제목
+  description             String?   // 설명
+  order                   Int       // 순서
+  contents                Content[]
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  deletedAt               DateTime?
+
+  @@map("topics")
+}
+
+// 컨텐츠 모델
+model Content {
+  id          String   @id @default(uuid())
+  topicId     String   // 소속 주제 ID
+  topic       Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  title       String   // 컨텐츠 제목
+  order       Int      // 순서
+  steps       Step[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@map("contents")
+}
+
+// 스텝 모델
+model Step {
+  id                String            @id @default(uuid())
+  contentId         String            // 소속 컨텐츠 ID
+  content           Content           @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  pageTitle         String            // 페이지 제목
+  order             Int               // 순서
+  contentItems      StepContentItem[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+
+  @@map("steps")
+}
+
+// 스텝 컨텐츠 아이템 모델
+model StepContentItem {
+  id          String          @id @default(uuid())
+  stepId      String          // 소속 스텝 ID
+  step        Step            @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  type        ContentItemType // 컨텐츠 타입
+  order       Int             // 순서
+  // 타입별 데이터 (JSON)
+  // SPEECH_BUBBLE: { text: string }
+  // TEXT: { text: string }
+  // IMAGE: { imageUrl: string }
+  // DATE: { date: string }
+  // LABEL_TEXT_FIELD: { label: string, placeholder: string }
+  // CHECKBOX: { text: string }
+  // QNA: { question: string, placeholder: string }
+  data        Json            // 타입별 데이터
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deletedAt   DateTime?
+
+  @@map("step_content_items")
+}
+
 
