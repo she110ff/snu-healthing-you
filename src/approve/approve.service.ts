@@ -51,7 +51,7 @@ export class ApproveService {
       data: {
         approvedByAdmin: true,
         approvedAt: new Date(),
-        approvedById: adminId,
+        approvedById: null, // 관리자는 Admin 테이블에 있으므로 null로 설정
       },
       select: {
         id: true,
@@ -82,7 +82,7 @@ export class ApproveService {
       sido: updatedUser.sido ?? undefined,
       guGun: updatedUser.guGun ?? undefined,
       approvedAt: updatedUser.approvedAt!,
-      approvedById: updatedUser.approvedById!,
+      approvedById: updatedUser.approvedById ?? null,
     };
   }
 
@@ -145,7 +145,7 @@ export class ApproveService {
           data: {
             approvedByAdmin: true,
             approvedAt,
-            approvedById: adminId,
+            approvedById: null, // 관리자는 Admin 테이블에 있으므로 null로 설정
           },
           select: {
             id: true,

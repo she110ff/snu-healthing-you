@@ -87,3 +87,4 @@ export class ApproveController {
     return this.approveService.approveUser(id, adminId);
   }
 }
+

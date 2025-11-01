@@ -118,6 +118,57 @@ DELETE /api/v1/users/:id - 사용자 삭제
 
 ## Run tests
 
+### 테스트 데이터베이스 설정
+
+E2E 테스트는 자동으로 테스트 전용 데이터베이스를 사용합니다. 테스트 데이터베이스를 생성하세요:
+
+**방법 1: npm 스크립트 사용 (권장)**
+
+```bash
+# 테스트 데이터베이스 생성 및 마이그레이션 적용 (한 번에 실행)
+$ npm run test:db:setup
+```
+
+**방법 2: 단계별 실행**
+
+```bash
+# 1. 테스트 데이터베이스 생성
+$ npm run test:db:create
+
+# 2. 마이그레이션 적용
+$ npm run test:db:migrate
+```
+
+**방법 3: 수동으로 SQL 실행**
+
+```bash
+# PostgreSQL에 접속
+psql -U postgres
+
+# 테스트 데이터베이스 생성
+CREATE DATABASE snu_healthing_you_test;
+
+# 종료
+\q
+
+# 마이그레이션 적용
+$ npm run test:db:migrate
+```
+
+**방법 4: SQL 파일 사용**
+
+```bash
+psql -U postgres -f scripts/create-test-db.sql
+npm run test:db:migrate
+```
+
+**참고:**
+
+- 테스트 실행 시 `.env` 파일에 `DATABASE_URL`이 없으면 자동으로 테스트 전용 데이터베이스 URL(`snu_healthing_you_test`)을 사용합니다.
+- 환경변수가 이미 설정되어 있으면 그것을 우선 사용합니다.
+
+### 테스트 실행
+
 ```bash
 # unit tests
 $ npm run test

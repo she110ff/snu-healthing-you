@@ -39,10 +39,11 @@ export class ApproveUserResponseDto {
   approvedAt: Date;
 
   @ApiProperty({
-    description: '승인한 관리자 ID',
+    description: '승인한 관리자/사용자 ID (관리자 승인 시 null)',
     example: '123e4567-e89b-12d3-a456-426614174002',
+    required: false,
   })
-  approvedById: string;
+  approvedById?: string | null;
 
   @ApiProperty({
     description: '생년월일',
@@ -98,4 +99,5 @@ export class ApproveUserResponseDto {
   })
   updatedAt: Date;
 }
+
 
