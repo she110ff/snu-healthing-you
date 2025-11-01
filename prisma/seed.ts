@@ -36,7 +36,7 @@ async function main() {
     create: {
       id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
       email: 'user2@snu.ac.kr',
-      password: '$2b$10$3qbKya2Vy7cQ8dKXqtUvzOD247FO45HVWRYetj73ML0XwD3c0WXQK', // password: "password"
+      password: '$2b$10$3qbKya2Vy7cQ8dKXqtUvzOD247FO45HVWRYetj73ML0XwD3c0WXQK', // password: "password123"
       name: '사용자2',
       emailVerified: true,
       approvedByAdmin: true,
