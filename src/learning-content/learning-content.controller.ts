@@ -434,7 +434,16 @@ export class LearningContentController {
   @Post('steps')
   @ApiOperation({
     summary: '[관리자] 스텝 생성',
-    description: '관리자가 스텝과 컨텐츠 아이템을 생성합니다.',
+    description: `관리자가 스텝과 컨텐츠 아이템을 생성합니다.
+    
+ContentItemType :
+- SPEECH_BUBBLE: 말풍선
+- TEXT: 텍스트
+- IMAGE: 이미지
+- DATE: 날짜
+- LABEL_TEXT_FIELD: 레이블+텍스트필드
+- CHECKBOX: 체크박스
+- QNA: 문답`,
   })
   @ApiResponse({
     status: 201,
