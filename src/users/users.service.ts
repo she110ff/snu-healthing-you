@@ -70,7 +70,8 @@ export class UsersService {
       if (
         error instanceof PrismaClientKnownRequestError &&
         error.code === 'P2002' &&
-        error.meta?.target?.includes('email')
+        Array.isArray(error.meta?.target) &&
+        error.meta.target.includes('email')
       ) {
         throw new ConflictException('이미 가입된 이메일입니다.');
       }
