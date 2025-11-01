@@ -13,6 +13,7 @@ import { DiseaseHistoryModule } from './disease-history/disease-history.module';
 import { UserInterestGroupModule } from './user-interest-group/user-interest-group.module';
 import { ApproveModule } from './approve/approve.module';
 import { LearningContentModule } from './learning-content/learning-content.module';
+import { DailyLearningModule } from './daily-learning/daily-learning.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { LearningContentModule } from './learning-content/learning-content.modul
     UserInterestGroupModule,
     ApproveModule,
     LearningContentModule,
+    DailyLearningModule,
   ],
   controllers: [AppController],
   providers: [AppService],

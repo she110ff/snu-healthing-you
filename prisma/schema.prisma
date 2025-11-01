@@ -18,13 +18,13 @@ model Admin {
 }
 
 model User {
-  id                String             @id @default(uuid())
-  email             String             @unique
+  id                String               @id @default(uuid())
+  email             String               @unique
   password          String
   name              String?
-  role              String             @default("USER")
-  emailVerified     Boolean            @default(false)
-  approvedByAdmin   Boolean            @default(false)
+  role              String               @default("USER")
+  emailVerified     Boolean              @default(false)
+  approvedByAdmin   Boolean              @default(false)
   approvedAt        DateTime?
   approvedById      String?
   dateOfBirth       DateTime
@@ -36,10 +36,12 @@ model User {
   diseaseHistory    DiseaseHistory?
   healthCheckups    HealthCheckup[]
   userInterestGroup UserInterestGroup?
-  approvedBy        User?              @relation("UserApprovals", fields: [approvedById], references: [id])
-  approvedUsers     User[]             @relation("UserApprovals")
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  learningProgress  UserLearningProgress[]
+  dailyLearningSessions DailyLearningSession[]
+  approvedBy        User?                @relation("UserApprovals", fields: [approvedById], references: [id])
+  approvedUsers     User[]               @relation("UserApprovals")
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
   deletedAt         DateTime?
 
   @@map("users")
@@ -136,6 +138,8 @@ model LearningContentGroup {
   description        String?
   topics             Topic[]
   userInterestGroups UserInterestGroup[]
+  learningProgress   UserLearningProgress[]
+  dailyLearningSessions DailyLearningSession[]
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   deletedAt          DateTime?
@@ -151,6 +155,7 @@ model Topic {
   order                  Int
   contents               Content[]
   learningContentGroup   LearningContentGroup @relation(fields: [learningContentGroupId], references: [id], onDelete: Cascade)
+  userProgressAsCurrent  UserLearningProgress[] @relation("CurrentTopic")
   createdAt              DateTime             @default(now())
   updatedAt              DateTime             @updatedAt
   deletedAt              DateTime?
@@ -159,29 +164,31 @@ model Topic {
 }
 
 model Content {
-  id        String   @id @default(uuid())
-  topicId   String
-  title     String
-  order     Int
-  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  steps     Step[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
+  id                    String                @id @default(uuid())
+  topicId               String
+  title                 String
+  order                 Int
+  topic                 Topic                 @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  steps                 Step[]
+  userProgressAsCurrent UserLearningProgress[] @relation("CurrentContent")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  deletedAt             DateTime?
 
   @@map("contents")
 }
 
 model Step {
-  id           String            @id @default(uuid())
-  contentId    String
-  pageTitle    String
-  order        Int
-  contentItems StepContentItem[]
-  content      Content           @relation(fields: [contentId], references: [id], onDelete: Cascade)
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  deletedAt    DateTime?
+  id                    String                @id @default(uuid())
+  contentId             String
+  pageTitle             String
+  order                 Int
+  contentItems          StepContentItem[]
+  content               Content               @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  userProgressAsCurrent UserLearningProgress[] @relation("CurrentStep")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  deletedAt             DateTime?
 
   @@map("steps")
 }
@@ -208,4 +215,46 @@ enum ContentItemType {
   LABEL_TEXT_FIELD
   CHECKBOX
   QNA
+}
+
+model UserLearningProgress {
+  id                     String               @id @default(uuid())
+  userId                 String
+  learningContentGroupId String
+  currentTopicId         String?
+  currentContentId       String?
+  currentStepId           String?
+  isCompleted            Boolean              @default(false)
+  completedAt            DateTime?
+  user                   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  learningContentGroup   LearningContentGroup @relation(fields: [learningContentGroupId], references: [id], onDelete: Cascade)
+  dailyLearningSessions  DailyLearningSession[]
+  currentTopic           Topic?               @relation("CurrentTopic", fields: [currentTopicId], references: [id])
+  currentContent         Content?             @relation("CurrentContent", fields: [currentContentId], references: [id])
+  currentStep            Step?                @relation("CurrentStep", fields: [currentStepId], references: [id])
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  @@unique([userId, learningContentGroupId])
+  @@map("user_learning_progress")
+}
+
+model DailyLearningSession {
+  id                     String               @id @default(uuid())
+  userId                 String
+  learningContentGroupId String
+  userProgressId         String
+  sessionDate            DateTime             @default(now())
+  topicsCompleted        Int                  @default(0)
+  contentsCompleted      Int                  @default(0)
+  stepsCompleted         Int                  @default(0)
+  lastLearningAt         DateTime             @default(now())
+  user                   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  learningContentGroup   LearningContentGroup @relation(fields: [learningContentGroupId], references: [id], onDelete: Cascade)
+  userProgress           UserLearningProgress @relation(fields: [userProgressId], references: [id], onDelete: Cascade)
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  @@unique([userId, learningContentGroupId, sessionDate])
+  @@map("daily_learning_sessions")
 }

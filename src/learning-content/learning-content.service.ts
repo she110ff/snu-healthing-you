@@ -568,7 +568,7 @@ export class LearningContentService {
       });
 
       // 새 컨텐츠 아이템 생성
-      let contentItems = [];
+      let contentItems: any[] = [];
       if (updateDto.contentItems && updateDto.contentItems.length > 0) {
         contentItems = await Promise.all(
           updateDto.contentItems.map((item) =>
