@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegionResponseDto } from './dto/region-response.dto';
 import { RegionDetailResponseDto } from './dto/region-detail-response.dto';
@@ -77,5 +77,54 @@ export class RegionCodeService {
       regionName: detail.region.name,
     };
   }
-}
 
+  /**
+   * 시도 코드 검증
+   */
+  async validateRegionCode(code: string): Promise<void> {
+    const region = await this.prisma.region.findUnique({
+      where: { code },
+    });
+
+    if (!region) {
+      throw new BadRequestException(`유효하지 않은 시도 코드입니다: ${code}`);
+    }
+  }
+
+  /**
+   * 시군구 코드 검증
+   */
+  async validateRegionDetailCode(code: string): Promise<void> {
+    const detail = await this.prisma.regionDetail.findUnique({
+      where: { code },
+    });
+
+    if (!detail) {
+      throw new BadRequestException(`유효하지 않은 시군구 코드입니다: ${code}`);
+    }
+  }
+
+  /**
+   * 시도 코드로 이름 조회
+   */
+  async getRegionNameByCode(code: string): Promise<string | null> {
+    const region = await this.prisma.region.findUnique({
+      where: { code },
+      select: { name: true },
+    });
+
+    return region?.name || null;
+  }
+
+  /**
+   * 시군구 코드로 이름 조회
+   */
+  async getRegionDetailNameByCode(code: string): Promise<string | null> {
+    const detail = await this.prisma.regionDetail.findUnique({
+      where: { code },
+      select: { name: true },
+    });
+
+    return detail?.name || null;
+  }
+}

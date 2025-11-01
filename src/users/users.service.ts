@@ -2,13 +2,12 @@ import {
   Injectable,
   NotFoundException,
   GoneException,
-  BadRequestException,
-  UnauthorizedException,
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailVerificationService } from '../email-verification/email-verification.service';
 import { OrganizationVerificationService } from '../organization-verification/organization-verification.service';
+import { RegionCodeService } from '../region-code/region-code.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DeleteUserResponseDto } from './dto/delete-user-response.dto';
@@ -21,6 +20,7 @@ export class UsersService {
     private prisma: PrismaService,
     private emailVerificationService: EmailVerificationService,
     private organizationVerificationService: OrganizationVerificationService,
+    private regionCodeService: RegionCodeService,
   ) {}
 
   /**
@@ -31,6 +31,8 @@ export class UsersService {
       verificationCode,
       organizationCode,
       dateOfBirth,
+      sidoCode,
+      guGunCode,
       ...userData
     } = createUserDto;
 
@@ -45,6 +47,10 @@ export class UsersService {
       organizationCode,
     );
 
+    // 지역 코드 검증
+    await this.regionCodeService.validateRegionCode(sidoCode);
+    await this.regionCodeService.validateRegionDetailCode(guGunCode);
+
     // 이미 가입된 사용자 확인
     const existingUser = await this.prisma.user.findUnique({
       where: { email: userData.email },
@@ -56,6 +62,10 @@ export class UsersService {
 
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
+    // 지역 이름 조회
+    const sidoName = await this.regionCodeService.getRegionNameByCode(sidoCode);
+    const guGunName = await this.regionCodeService.getRegionDetailNameByCode(guGunCode);
+
     return this.prisma.user.create({
       data: {
         ...userData,
@@ -63,21 +73,18 @@ export class UsersService {
         emailVerified: true,
         approvedByAdmin: false,
         dateOfBirth: new Date(dateOfBirth),
+        sidoCode,
+        guGunCode,
+        sido: sidoName || '',
+        guGun: guGunName || '',
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        emailVerified: true,
-        approvedByAdmin: true,
-        dateOfBirth: true,
-        gender: true,
-        height: true,
-        weight: true,
-        sido: true,
-        guGun: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
+        sidoRegion: true,
+        guGunRegionDetail: {
+          include: {
+            region: true,
+          },
+        },
       },
     });
   }
@@ -86,8 +93,17 @@ export class UsersService {
    * 사용자 생성 (내부 사용, 관리자용)
    */
   async create(createUserDto: CreateUserDto) {
-    const { verificationCode, dateOfBirth, ...userData } = createUserDto;
+    const { verificationCode, dateOfBirth, sidoCode, guGunCode, ...userData } = createUserDto;
+    
+    // 지역 코드 검증
+    await this.regionCodeService.validateRegionCode(sidoCode);
+    await this.regionCodeService.validateRegionDetailCode(guGunCode);
+    
     const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+    // 지역 이름 조회
+    const sidoName = await this.regionCodeService.getRegionNameByCode(sidoCode);
+    const guGunName = await this.regionCodeService.getRegionDetailNameByCode(guGunCode);
 
     return this.prisma.user.create({
       data: {
@@ -96,21 +112,18 @@ export class UsersService {
         emailVerified: true,
         approvedByAdmin: false,
         dateOfBirth: new Date(dateOfBirth),
+        sidoCode,
+        guGunCode,
+        sido: sidoName || '',
+        guGun: guGunName || '',
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        emailVerified: true,
-        approvedByAdmin: true,
-        dateOfBirth: true,
-        gender: true,
-        height: true,
-        weight: true,
-        sido: true,
-        guGun: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
+        sidoRegion: true,
+        guGunRegionDetail: {
+          include: {
+            region: true,
+          },
+        },
       },
     });
   }
@@ -123,22 +136,13 @@ export class UsersService {
       orderBy: {
         createdAt: 'desc',
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        emailVerified: true,
-        approvedByAdmin: true,
-        dateOfBirth: true,
-        gender: true,
-        height: true,
-        weight: true,
-        sido: true,
-        guGun: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-        // password 필드는 제외
+      include: {
+        sidoRegion: true,
+        guGunRegionDetail: {
+          include: {
+            region: true,
+          },
+        },
       },
     });
   }
@@ -146,22 +150,13 @@ export class UsersService {
   async findOne(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        emailVerified: true,
-        approvedByAdmin: true,
-        dateOfBirth: true,
-        gender: true,
-        height: true,
-        weight: true,
-        sido: true,
-        guGun: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-        // password 필드는 제외
+      include: {
+        sidoRegion: true,
+        guGunRegionDetail: {
+          include: {
+            region: true,
+          },
+        },
       },
     });
 
@@ -224,32 +219,29 @@ export class UsersService {
     if (updateUserDto.weight !== undefined) {
       updateData.weight = updateUserDto.weight;
     }
-    if (updateUserDto.sido !== undefined) {
-      updateData.sido = updateUserDto.sido;
+    if (updateUserDto.sidoCode !== undefined) {
+      await this.regionCodeService.validateRegionCode(updateUserDto.sidoCode);
+      const sidoName = await this.regionCodeService.getRegionNameByCode(updateUserDto.sidoCode);
+      updateData.sidoCode = updateUserDto.sidoCode;
+      updateData.sido = sidoName || '';
     }
-    if (updateUserDto.guGun !== undefined) {
-      updateData.guGun = updateUserDto.guGun;
+    if (updateUserDto.guGunCode !== undefined) {
+      await this.regionCodeService.validateRegionDetailCode(updateUserDto.guGunCode);
+      const guGunName = await this.regionCodeService.getRegionDetailNameByCode(updateUserDto.guGunCode);
+      updateData.guGunCode = updateUserDto.guGunCode;
+      updateData.guGun = guGunName || '';
     }
 
     return this.prisma.user.update({
       where: { id },
       data: updateData,
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        emailVerified: true,
-        approvedByAdmin: true,
-        dateOfBirth: true,
-        gender: true,
-        height: true,
-        weight: true,
-        sido: true,
-        guGun: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-        // password 필드는 제외
+      include: {
+        sidoRegion: true,
+        guGunRegionDetail: {
+          include: {
+            region: true,
+          },
+        },
       },
     });
   }

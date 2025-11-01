@@ -101,18 +101,18 @@ export class CreateUserDto {
   weight: number;
 
   @ApiProperty({
-    description: '시도',
-    example: '서울특별시',
+    description: '시도 코드 (Region code)',
+    example: '11',
   })
   @IsString()
   @IsNotEmpty()
-  sido: string;
+  sidoCode: string;
 
   @ApiProperty({
-    description: '구군',
-    example: '강남구',
+    description: '시군구 코드 (RegionDetail code)',
+    example: '11680',
   })
   @IsString()
   @IsNotEmpty()
-  guGun: string;
+  guGunCode: string;
 }

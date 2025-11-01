@@ -33,6 +33,8 @@ model User {
   weight            Float
   sido              String
   guGun             String
+  sidoCode          String?
+  guGunCode         String?
   diseaseHistory    DiseaseHistory?
   healthCheckups    HealthCheckup[]
   userInterestGroup UserInterestGroup?
@@ -40,6 +42,8 @@ model User {
   dailyLearningSessions DailyLearningSession[]
   approvedBy        User?                @relation("UserApprovals", fields: [approvedById], references: [id])
   approvedUsers     User[]               @relation("UserApprovals")
+  sidoRegion        Region?              @relation("UserSido", fields: [sidoCode], references: [code])
+  guGunRegionDetail RegionDetail?        @relation("UserGuGun", fields: [guGunCode], references: [code])
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
   deletedAt         DateTime?
@@ -263,6 +267,7 @@ model Region {
   code        String          @id
   name        String
   details     RegionDetail[]
+  users       User[]          @relation("UserSido")
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
@@ -274,6 +279,7 @@ model RegionDetail {
   name        String
   regionCode  String
   region      Region   @relation(fields: [regionCode], references: [code], onDelete: Cascade)
+  users       User[]   @relation("UserGuGun")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
