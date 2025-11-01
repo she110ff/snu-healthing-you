@@ -136,19 +136,34 @@ async function main() {
 
   console.log('user2 질환 이력 데이터 생성 완료:', diseaseHistory);
 
-  // user2의 관심 그룹 데이터 생성 (하나만 가능)
-  const interestGroup = await prisma.interestGroup.upsert({
+  // LearningContentGroup 생성 (고혈압 관리 그룹)
+  const learningContentGroup = await prisma.learningContentGroup.upsert({
+    where: { id: 'learning-content-group-hypertension-001' },
+    update: {},
+    create: {
+      id: 'learning-content-group-hypertension-001',
+      name: '고혈압 관리 그룹',
+      description: '고혈압 관리를 위한 학습 컨텐츠 그룹',
+      createdAt: new Date('2024-06-15T11:20:00.000Z'),
+      updatedAt: new Date('2024-06-15T11:20:00.000Z'),
+    },
+  });
+
+  console.log('학습 컨텐츠 그룹 생성 완료:', learningContentGroup);
+
+  // user2의 사용자 관심 그룹 데이터 생성 (하나만 가능)
+  const userInterestGroup = await prisma.userInterestGroup.upsert({
     where: { userId: user2.id },
     update: {},
     create: {
       userId: user2.id,
-      group: 'HYPERTENSION_MANAGEMENT',
+      learningContentGroupId: learningContentGroup.id,
       createdAt: new Date('2024-06-15T11:30:00.000Z'),
       updatedAt: new Date('2024-06-15T11:30:00.000Z'),
     },
   });
 
-  console.log('user2 관심 그룹 데이터 생성 완료:', interestGroup);
+  console.log('user2 사용자 관심 그룹 데이터 생성 완료:', userInterestGroup);
 }
 
 main()

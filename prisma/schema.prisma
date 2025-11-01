@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,10 +6,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-// -------------------------------------------
-// 0. 관리자 모델
-// -------------------------------------------
 
 model Admin {
   id        String   @id @default(uuid())
@@ -24,42 +17,38 @@ model Admin {
   @@map("admins")
 }
 
-// -------------------------------------------
-// 1. 핵심 사용자 및 회원가입 모델
-// -------------------------------------------
-
 model User {
-  id               String          @id @default(uuid())
-  email            String          @unique
-  password         String
-  name             String?
-  emailVerified    Boolean         @default(false)
-  approvedByAdmin  Boolean         @default(false)
-  approvedAt       DateTime?
-  approvedById     String?
-  approvedBy       User?           @relation("UserApprovals", fields: [approvedById], references: [id])
-  approvedUsers    User[]          @relation("UserApprovals")
-  dateOfBirth      DateTime        // 생년월일
-  gender           String          // 성별 (MALE, FEMALE 등)
-  height           Float           // 키 (cm)
-  weight           Float           // 몸무게 (kg)
-  sido             String          // 시도
-  guGun            String          // 구군
-  healthCheckups   HealthCheckup[]
-  diseaseHistory   DiseaseHistory?
-  interestGroup    InterestGroup?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  deletedAt        DateTime?
+  id                String             @id @default(uuid())
+  email             String             @unique
+  password          String
+  name              String?
+  role              String             @default("USER")
+  emailVerified     Boolean            @default(false)
+  approvedByAdmin   Boolean            @default(false)
+  approvedAt        DateTime?
+  approvedById      String?
+  dateOfBirth       DateTime
+  gender            String
+  height            Float
+  weight            Float
+  sido              String
+  guGun             String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  deletedAt         DateTime?
+  diseaseHistory    DiseaseHistory?
+  healthCheckups    HealthCheckup[]
+  userInterestGroup UserInterestGroup?
+  approvedBy        User?              @relation("UserApprovals", fields: [approvedById], references: [id])
+  approvedUsers     User[]             @relation("UserApprovals")
 
   @@map("users")
 }
 
-// 이메일 인증 모델
 model EmailVerification {
   id         String    @id @default(uuid())
   email      String    @unique
-  code       String    // 해시된 인증코드
+  code       String
   expiresAt  DateTime
   verifiedAt DateTime?
   createdAt  DateTime  @default(now())
@@ -68,219 +57,155 @@ model EmailVerification {
   @@map("email_verifications")
 }
 
-// -------------------------------------------
-// 2. 기관, 정책, 미션 모델 (어드민 관리)
-// -------------------------------------------
-
 model InstitutionConfig {
   id                         String  @id @default(uuid())
-  name                       String  @unique // "서울대학교"
-  emailForm                  String  @unique // "snu.ac.kr"
-  contactPersonName          String? // 담당자명
-  contactPersonPhone         String? // 담당자 연락처
-  contactPersonEmail         String? // 담당자 이메일
-  businessRegistrationNumber String? // 사업자등록번호
+  name                       String  @unique
+  emailForm                  String  @unique
+  contactPersonName          String?
+  contactPersonPhone         String?
+  contactPersonEmail         String?
+  businessRegistrationNumber String?
   pointPoolTotal             BigInt
   pointPoolRemaining         BigInt
-  pointLimitPerUser          Int // 개인별 월간 포인트 지급 한도
-  affiliationCodes           Json // [{"code": "SNU01", "name": "교원"}, ...]
+  pointLimitPerUser          Int
+  affiliationCodes           Json
 
   @@map("institution_configs")
 }
 
-// -------------------------------------------
-// 3. 건강검진, 추가질문-질환/관심그룹/헬스스캐닝 모델 (온보딩)
-// -------------------------------------------
-// 건강검진 모델
 model HealthCheckup {
-  id                    String         @id @default(uuid())
-  userId                String
-  user                  User           @relation(fields: [userId], references: [id])
-  checkupDate           DateTime?      // 건강 검진일
-  bmi                   Float?         // 1. 체질량지수 (BMI)
-  waistCircumference    Float?         // 2. 허리둘레 (cm)
-  systolicBloodPressure Int?           // 3. 수축기 혈압
-  diastolicBloodPressure Int?          // 3. 이완기 혈압
-  totalCholesterol      Int?           // 4. 총 콜레스테롤 (mg/dL)
-  hdlCholesterol        Int?           // 5. HDL 고밀도 지단백 (mg/dL) - 좋은 콜레스테롤
-  ldlCholesterol        Int?           // 6. LDL 저밀도 지단백 (mg/dL) - 나쁜 콜레스테롤
-  triglycerides         Int?           // 7. 중성지방 트리글리세라이드 (mg/dL)
-  hemoglobin            Float?         // 8. 혈색소 (g/dL)
-  ast                   Int?           // 9. AST (GOT) - 간, 근육 등 손상 시 상승
-  alt                   Int?           // 10. ALT (GPT) - 간 손상 시 상승
-  serumCreatinine       Float?         // 11. 혈청크레아티닌 (mg/dL) - 신장 기능 저하 시 상승
-  glomerularFiltrationRate Float?      // 12. 신사구체여과율 (mL/min) - GFR, 신장 기능 저하 시 저하
-  createdAt             DateTime       @default(now())
-  updatedAt             DateTime       @updatedAt
-  
+  id                       String    @id @default(uuid())
+  userId                   String
+  checkupDate              DateTime?
+  bmi                      Float?
+  waistCircumference       Float?
+  systolicBloodPressure    Int?
+  diastolicBloodPressure   Int?
+  totalCholesterol         Int?
+  hdlCholesterol           Int?
+  ldlCholesterol           Int?
+  triglycerides            Int?
+  hemoglobin               Float?
+  ast                      Int?
+  alt                      Int?
+  serumCreatinine          Float?
+  glomerularFiltrationRate Float?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  user                     User      @relation(fields: [userId], references: [id])
+
   @@map("health_checkups")
 }
 
-// 질환 이력 모델 (건강검진 저장 후 추가 질문)
 model DiseaseHistory {
-  id                         String       @id @default(uuid())
-  userId                     String       @unique
-  user                       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // 질환명 1: 만성질환 질환명 (다중 선택 가능)
-  // 선택지: 없음, 이상지질혈증, 고혈압, 당뇨, 골다공증, 만성콩팥병
-  chronicDiseases            String[]     @default([])
-  
-  // 질환명 1: 만성 호흡기 질환명 (다중 선택 가능)
-  // 선택지: 없음, 만성폐쇄성 폐질환, 기관지 천식, 특발성 폐섬유증, 결핵 후 폐 손상, 결핵 치료중
-  chronicRespiratoryDiseases String[]     @default([])
-  
-  // 질환명 1: 만성 호흡기 질환 기타
+  id                         String   @id @default(uuid())
+  userId                     String   @unique
+  chronicDiseases            String[] @default([])
+  chronicRespiratoryDiseases String[] @default([])
   chronicRespiratoryOther    String?
-  
-  // 질환명 1: 만성 관절염 (다중 선택 가능)
-  // 선택지: 없음, 류마티스 관절염, 통풍, 기타
-  chronicArthritis           String[]     @default([])
-  
-  // 질환명 1: 골관절염 (고관절, 무릎, 손)
+  chronicArthritis           String[] @default([])
   osteoarthritis             String?
-  
-  // 질환명 1: 만성 관절염 기타
   chronicArthritisOther      String?
-  
-  // 질환명 2: 타질환 과거력 - 만성질환 (다중 선택 가능)
-  // 선택지: 없음, 심장질환, 간 질환, 뇌졸중/뇌출혈
-  pastChronicDiseases        String[]     @default([])
-  
-  // 질환명 2: 5년 내 암 과거력 (다중 선택 가능, 암 선택 시에만 표시)
-  // 선택지: 유방암, 폐암, 대장암, 간암, 위암
-  cancerHistory              String[]     @default([])
-  
-  // 질환명 2: 암 과거력 기타
+  pastChronicDiseases        String[] @default([])
+  cancerHistory              String[] @default([])
   cancerOther                String?
-  
-  // 질환명 2: 현재 흡연 여부 (필수)
-  // 선택지: 예, 아니요
-  isSmoking                  String?      // "YES" | "NO"
-  
-  // 질환명 2: 현재 음주 여부 (필수)
-  // 선택지: 예, 아니요
-  isDrinking                 String?      // "YES" | "NO"
-  
-  createdAt                  DateTime      @default(now())
-  updatedAt                  DateTime      @updatedAt
-  
+  isSmoking                  String?
+  isDrinking                 String?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+  user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("disease_histories")
 }
 
-// 관심 그룹 모델 (온보딩 추가 질문)
-model InterestGroup {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // 관심 그룹 (단일 선택)
-  // 선택지: 일반인 그룹, 암 치료 후 회복 그룹, 당뇨 관리 그룹, 당뇨 고위험 그룹,
-  //        고혈압 관리 그룹, 고혈압 고위험 그룹, 이상지질혈증 관리 그룹, 이상지질혈증 고위험 그룹
-  group     String   // "GENERAL" | "CANCER_RECOVERY" | "DIABETES_MANAGEMENT" | "DIABETES_HIGH_RISK" | 
-                     // "HYPERTENSION_MANAGEMENT" | "HYPERTENSION_HIGH_RISK" | 
-                     // "DYSLIPIDEMIA_MANAGEMENT" | "DYSLIPIDEMIA_HIGH_RISK"
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("interest_groups")
+model UserInterestGroup {
+  id                     String               @id @default(uuid())
+  userId                 String               @unique
+  learningContentGroupId String
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  learningContentGroup   LearningContentGroup @relation(fields: [learningContentGroupId], references: [id], onDelete: Cascade)
+  user                   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_interest_groups")
 }
 
-// -------------------------------------------
-// 4. 학습 컨텐츠 모델 (관리자 관리)
-// -------------------------------------------
-
-enum ContentItemType {
-  SPEECH_BUBBLE    // 말풍선
-  TEXT             // 텍스트
-  IMAGE            // 이미지
-  DATE             // 날짜
-  LABEL_TEXT_FIELD // 레이블+텍스트필드
-  CHECKBOX         // 체크박스
-  QNA              // 문답
-}
-
-// 학습 컨텐츠 관심 그룹 모델
 model LearningContentGroup {
-  id          String   @id @default(uuid())
-  name        String   // 그룹명 (예: "당뇨 관리 그룹", "고혈압 관리 그룹")
-  description String?  // 설명
-  topics      Topic[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
+  id                 String              @id @default(uuid())
+  name               String
+  description        String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  deletedAt          DateTime?
+  topics             Topic[]
+  userInterestGroups UserInterestGroup[]
 
   @@map("learning_content_groups")
 }
 
-// 주제 모델
 model Topic {
-  id                      String    @id @default(uuid())
-  learningContentGroupId  String    // 소속 그룹 ID
-  learningContentGroup    LearningContentGroup @relation(fields: [learningContentGroupId], references: [id], onDelete: Cascade)
-  title                   String    // 주제 제목
-  description             String?   // 설명
-  order                   Int       // 순서
-  contents                Content[]
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
-  deletedAt               DateTime?
+  id                     String               @id @default(uuid())
+  learningContentGroupId String
+  title                  String
+  description            String?
+  order                  Int
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  deletedAt              DateTime?
+  contents               Content[]
+  learningContentGroup   LearningContentGroup @relation(fields: [learningContentGroupId], references: [id], onDelete: Cascade)
 
   @@map("topics")
 }
 
-// 컨텐츠 모델
 model Content {
-  id          String   @id @default(uuid())
-  topicId     String   // 소속 주제 ID
-  topic       Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  title       String   // 컨텐츠 제목
-  order       Int      // 순서
-  steps       Step[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
+  id        String    @id @default(uuid())
+  topicId   String
+  title     String
+  order     Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  topic     Topic     @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  steps     Step[]
 
   @@map("contents")
 }
 
-// 스텝 모델
 model Step {
-  id                String            @id @default(uuid())
-  contentId         String            // 소속 컨텐츠 ID
-  content           Content           @relation(fields: [contentId], references: [id], onDelete: Cascade)
-  pageTitle         String            // 페이지 제목
-  order             Int               // 순서
-  contentItems      StepContentItem[]
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  deletedAt         DateTime?
+  id           String            @id @default(uuid())
+  contentId    String
+  pageTitle    String
+  order        Int
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  deletedAt    DateTime?
+  contentItems StepContentItem[]
+  content      Content           @relation(fields: [contentId], references: [id], onDelete: Cascade)
 
   @@map("steps")
 }
 
-// 스텝 컨텐츠 아이템 모델
 model StepContentItem {
-  id          String          @id @default(uuid())
-  stepId      String          // 소속 스텝 ID
-  step        Step            @relation(fields: [stepId], references: [id], onDelete: Cascade)
-  type        ContentItemType // 컨텐츠 타입
-  order       Int             // 순서
-  // 타입별 데이터 (JSON)
-  // SPEECH_BUBBLE: { text: string }
-  // TEXT: { text: string }
-  // IMAGE: { imageUrl: string }
-  // DATE: { date: string }
-  // LABEL_TEXT_FIELD: { label: string, placeholder: string }
-  // CHECKBOX: { text: string }
-  // QNA: { question: string, placeholder: string }
-  data        Json            // 타입별 데이터
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  deletedAt   DateTime?
+  id        String          @id @default(uuid())
+  stepId    String
+  type      ContentItemType
+  order     Int
+  data      Json
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  deletedAt DateTime?
+  step      Step            @relation(fields: [stepId], references: [id], onDelete: Cascade)
 
   @@map("step_content_items")
 }
 
-
+enum ContentItemType {
+  SPEECH_BUBBLE
+  TEXT
+  IMAGE
+  DATE
+  LABEL_TEXT_FIELD
+  CHECKBOX
+  QNA
+}

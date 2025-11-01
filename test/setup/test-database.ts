@@ -10,7 +10,7 @@ export async function cleanDatabase() {
   // Foreign key 제약 조건으로 인해 역순으로 삭제
   await prisma.healthCheckup.deleteMany();
   await prisma.diseaseHistory.deleteMany();
-  await prisma.interestGroup.deleteMany();
+  await prisma.userInterestGroup.deleteMany();
   await prisma.user.deleteMany();
   await prisma.institutionConfig.deleteMany();
   await prisma.admin.deleteMany();

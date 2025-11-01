@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class InterestGroupResponseDto {
+export class UserInterestGroupResponseDto {
   @ApiProperty({
-    description: '관심 그룹 ID',
+    description: '사용자 관심 그룹 ID',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
   id: string;
@@ -14,20 +14,10 @@ export class InterestGroupResponseDto {
   userId: string;
 
   @ApiProperty({
-    description: '관심 그룹',
-    example: 'GENERAL',
-    enum: [
-      'GENERAL',
-      'CANCER_RECOVERY',
-      'DIABETES_MANAGEMENT',
-      'DIABETES_HIGH_RISK',
-      'HYPERTENSION_MANAGEMENT',
-      'HYPERTENSION_HIGH_RISK',
-      'DYSLIPIDEMIA_MANAGEMENT',
-      'DYSLIPIDEMIA_HIGH_RISK',
-    ],
+    description: '학습 컨텐츠 그룹 ID',
+    example: '550e8400-e29b-41d4-a716-446655440000',
   })
-  group: string;
+  learningContentGroupId: string;
 
   @ApiProperty({
     description: '생성일시',

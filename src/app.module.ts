@@ -10,7 +10,7 @@ import { EmailVerificationModule } from './email-verification/email-verification
 import { OrganizationVerificationModule } from './organization-verification/organization-verification.module';
 import { HealthCheckupModule } from './health-checkup/health-checkup.module';
 import { DiseaseHistoryModule } from './disease-history/disease-history.module';
-import { InterestGroupModule } from './interest-group/interest-group.module';
+import { UserInterestGroupModule } from './user-interest-group/user-interest-group.module';
 import { ApproveModule } from './approve/approve.module';
 import { LearningContentModule } from './learning-content/learning-content.module';
 
@@ -29,7 +29,7 @@ import { LearningContentModule } from './learning-content/learning-content.modul
     OrganizationVerificationModule,
     HealthCheckupModule,
     DiseaseHistoryModule,
-    InterestGroupModule,
+    UserInterestGroupModule,
     ApproveModule,
     LearningContentModule,
   ],
