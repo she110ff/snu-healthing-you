@@ -54,24 +54,6 @@ export class UsersController {
     return this.usersService.register(createUserDto);
   }
 
-  @Post()
-  @UseGuards(JwtAuthGuard, AdminGuard)
-  @ApiBearerAuth('bearer')
-  @ApiOperation({
-    summary: '사용자 생성 (관리자 전용)',
-    description: '관리자가 새로운 사용자를 직접 생성합니다.',
-  })
-  @ApiResponse({
-    status: 201,
-    description: '사용자가 성공적으로 생성되었습니다.',
-  })
-  @ApiUnauthorizedResponse({
-    description: '인증이 필요하거나 관리자 권한이 필요합니다.',
-  })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('bearer')
