@@ -4,6 +4,7 @@ import { createTestApp } from '../setup/test-setup';
 import { getUserToken } from '../setup/test-helpers';
 import { userFixtures } from '../fixtures/user.fixture';
 import { commonFixtures } from '../fixtures/common.fixture';
+import { PrismaService } from '../../src/prisma/prisma.service';
 
 describe('Users (e2e)', () => {
   let app: INestApplication;
@@ -11,6 +12,56 @@ describe('Users (e2e)', () => {
 
   beforeAll(async () => {
     app = await createTestApp();
+
+    // 테스트용 지역 코드 데이터 추가
+    const prisma = app.get(PrismaService);
+
+    // 시도 데이터 추가
+    const regions = [
+      { code: '11', name: '서울' },
+      { code: '26', name: '부산' },
+      { code: '27', name: '대구' },
+      { code: '28', name: '인천' },
+      { code: '29', name: '광주' },
+      { code: '30', name: '대전' },
+      { code: '31', name: '울산' },
+      { code: '41', name: '경기' },
+      { code: '51', name: '강원' },
+      { code: '43', name: '충북' },
+      { code: '44', name: '충남' },
+      { code: '52', name: '전북' },
+      { code: '46', name: '전남' },
+      { code: '47', name: '경북' },
+      { code: '48', name: '경남' },
+      { code: '36', name: '세종' },
+      { code: '50', name: '제주' },
+    ];
+
+    for (const region of regions) {
+      await prisma.region.upsert({
+        where: { code: region.code },
+        update: { name: region.name },
+        create: region,
+      });
+    }
+
+    // 시군구 데이터 추가 (서울과 부산 일부만)
+    const regionDetails = [
+      { code: '11000', name: '서울특별시', regionCode: '11' },
+      { code: '11110', name: '서울특별시 종로구', regionCode: '11' },
+      { code: '11680', name: '서울특별시 강남구', regionCode: '11' },
+      { code: '26000', name: '부산광역시', regionCode: '26' },
+      { code: '26350', name: '부산광역시 해운대구', regionCode: '26' },
+    ];
+
+    for (const detail of regionDetails) {
+      await prisma.regionDetail.upsert({
+        where: { code: detail.code },
+        update: { name: detail.name, regionCode: detail.regionCode },
+        create: detail,
+      });
+    }
+
     userToken = await getUserToken(
       app,
       userFixtures.existing.email,
@@ -25,7 +76,7 @@ describe('Users (e2e)', () => {
   describe('POST /api/v1/users/register', () => {
     it('회원가입 성공', async () => {
       const testEmail = `newuser${Date.now()}@snu.ac.kr`;
-      
+
       // 먼저 이메일 인증코드 발급
       const sendCodeResponse = await request(app.getHttpServer())
         .post('/api/v1/email-verification/send-code')
@@ -68,7 +119,7 @@ describe('Users (e2e)', () => {
 
     it('잘못된 인증코드로 회원가입 시도 시 실패', async () => {
       const testEmail = `invalidcode${Date.now()}@snu.ac.kr`;
-      
+
       // 먼저 올바른 인증코드 발급
       await request(app.getHttpServer())
         .post('/api/v1/email-verification/send-code')
@@ -92,6 +143,60 @@ describe('Users (e2e)', () => {
         .send({ email: userFixtures.new.email })
         .expect(400);
     });
+
+    it('유효하지 않은 시도 코드로 회원가입 시도 시 실패', async () => {
+      const testEmail = `invalidsido${Date.now()}@snu.ac.kr`;
+
+      // 먼저 이메일 인증코드 발급
+      const sendCodeResponse = await request(app.getHttpServer())
+        .post('/api/v1/email-verification/send-code')
+        .send({ email: testEmail })
+        .expect(200);
+
+      // 발급된 인증코드 사용
+      const verificationCode = sendCodeResponse.body.code || '123456';
+
+      // 유효하지 않은 시도 코드(99)로 회원가입 시도
+      return request(app.getHttpServer())
+        .post('/api/v1/users/register')
+        .send({
+          ...userFixtures.new,
+          email: testEmail,
+          verificationCode,
+          sidoCode: '99', // 존재하지 않는 시도 코드
+        })
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.message).toContain('유효하지 않은 시도 코드');
+        });
+    });
+
+    it('유효하지 않은 시군구 코드로 회원가입 시도 시 실패', async () => {
+      const testEmail = `invalidgugun${Date.now()}@snu.ac.kr`;
+
+      // 먼저 이메일 인증코드 발급
+      const sendCodeResponse = await request(app.getHttpServer())
+        .post('/api/v1/email-verification/send-code')
+        .send({ email: testEmail })
+        .expect(200);
+
+      // 발급된 인증코드 사용
+      const verificationCode = sendCodeResponse.body.code || '123456';
+
+      // 유효하지 않은 시군구 코드(99999)로 회원가입 시도
+      return request(app.getHttpServer())
+        .post('/api/v1/users/register')
+        .send({
+          ...userFixtures.new,
+          email: testEmail,
+          verificationCode,
+          guGunCode: '99999', // 존재하지 않는 시군구 코드
+        })
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.message).toContain('유효하지 않은 시군구 코드');
+        });
+    });
   });
 
   describe('GET /api/v1/users', () => {
@@ -106,9 +211,7 @@ describe('Users (e2e)', () => {
     });
 
     it('토큰 없이 접근 시도 시 실패', () => {
-      return request(app.getHttpServer())
-        .get('/api/v1/users')
-        .expect(401);
+      return request(app.getHttpServer()).get('/api/v1/users').expect(401);
     });
   });
 
@@ -243,9 +346,9 @@ describe('Users (e2e)', () => {
             expect(res.body).toHaveProperty('gender', updateData.gender);
             expect(res.body).toHaveProperty('dateOfBirth');
             // dateOfBirth는 Date 객체로 변환되어 반환되므로 형식 검증만
-            expect(new Date(res.body.dateOfBirth).toISOString().split('T')[0]).toBe(
-              updateData.dateOfBirth,
-            );
+            expect(
+              new Date(res.body.dateOfBirth).toISOString().split('T')[0],
+            ).toBe(updateData.dateOfBirth);
           });
       }
     });
@@ -321,5 +424,3 @@ describe('Users (e2e)', () => {
     });
   });
 });
-
-
