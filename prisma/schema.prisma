@@ -258,3 +258,25 @@ model DailyLearningSession {
   @@unique([userId, learningContentGroupId, sessionDate])
   @@map("daily_learning_sessions")
 }
+
+model Region {
+  code        String          @id
+  name        String
+  details     RegionDetail[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("regions")
+}
+
+model RegionDetail {
+  code        String   @id
+  name        String
+  regionCode  String
+  region      Region   @relation(fields: [regionCode], references: [code], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([regionCode])
+  @@map("region_details")
+}

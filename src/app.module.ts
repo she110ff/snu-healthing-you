@@ -14,6 +14,7 @@ import { UserInterestGroupModule } from './user-interest-group/user-interest-gro
 import { ApproveModule } from './approve/approve.module';
 import { LearningContentModule } from './learning-content/learning-content.module';
 import { DailyLearningModule } from './daily-learning/daily-learning.module';
+import { RegionCodeModule } from './region-code/region-code.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { DailyLearningModule } from './daily-learning/daily-learning.module';
     ApproveModule,
     LearningContentModule,
     DailyLearningModule,
+    RegionCodeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
