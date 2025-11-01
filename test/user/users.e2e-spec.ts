@@ -171,7 +171,7 @@ describe('Users (e2e)', () => {
   });
 
   describe('PATCH /api/v1/users/:id', () => {
-    it('사용자 정보 수정 성공', async () => {
+    it('사용자 정보 수정 성공 - 단일 필드 (height)', async () => {
       const listResponse = await request(app.getHttpServer())
         .get('/api/v1/users')
         .set('Authorization', `Bearer ${userToken}`)
@@ -180,7 +180,7 @@ describe('Users (e2e)', () => {
       if (listResponse.body.length > 0) {
         const userId = listResponse.body[0].id;
         const updateData = {
-          name: `수정된이름_${Date.now()}`,
+          height: 180.5,
         };
 
         return request(app.getHttpServer())
@@ -189,8 +189,109 @@ describe('Users (e2e)', () => {
           .send(updateData)
           .expect(200)
           .expect((res) => {
-            expect(res.body).toHaveProperty('name', updateData.name);
+            expect(res.body).toHaveProperty('height', updateData.height);
           });
+      }
+    });
+
+    it('사용자 정보 수정 성공 - 여러 필드 동시 수정', async () => {
+      const listResponse = await request(app.getHttpServer())
+        .get('/api/v1/users')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      if (listResponse.body.length > 0) {
+        const userId = listResponse.body[0].id;
+        const updateData = {
+          weight: 75.5,
+          sido: '부산광역시',
+          guGun: '해운대구',
+        };
+
+        return request(app.getHttpServer())
+          .patch(`/api/v1/users/${userId}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .send(updateData)
+          .expect(200)
+          .expect((res) => {
+            expect(res.body).toHaveProperty('weight', updateData.weight);
+            expect(res.body).toHaveProperty('sido', updateData.sido);
+            expect(res.body).toHaveProperty('guGun', updateData.guGun);
+          });
+      }
+    });
+
+    it('사용자 정보 수정 성공 - 생년월일 및 성별 수정', async () => {
+      const listResponse = await request(app.getHttpServer())
+        .get('/api/v1/users')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      if (listResponse.body.length > 0) {
+        const userId = listResponse.body[0].id;
+        const updateData = {
+          dateOfBirth: '1995-05-15',
+          gender: 'FEMALE',
+        };
+
+        return request(app.getHttpServer())
+          .patch(`/api/v1/users/${userId}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .send(updateData)
+          .expect(200)
+          .expect((res) => {
+            expect(res.body).toHaveProperty('gender', updateData.gender);
+            expect(res.body).toHaveProperty('dateOfBirth');
+            // dateOfBirth는 Date 객체로 변환되어 반환되므로 형식 검증만
+            expect(new Date(res.body.dateOfBirth).toISOString().split('T')[0]).toBe(
+              updateData.dateOfBirth,
+            );
+          });
+      }
+    });
+
+    it('존재하지 않는 사용자 ID로 수정 시도 시 실패', () => {
+      return request(app.getHttpServer())
+        .patch(`/api/v1/users/${commonFixtures.uuids.nonExistent}`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ height: 180.0 })
+        .expect(404);
+    });
+
+    it('잘못된 성별 값으로 수정 시도 시 실패', async () => {
+      const listResponse = await request(app.getHttpServer())
+        .get('/api/v1/users')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      if (listResponse.body.length > 0) {
+        const userId = listResponse.body[0].id;
+        return request(app.getHttpServer())
+          .patch(`/api/v1/users/${userId}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({ gender: 'INVALID' })
+          .expect(400);
+      }
+    });
+
+    it('허용되지 않은 필드(name)를 포함한 요청은 거부됨', async () => {
+      const listResponse = await request(app.getHttpServer())
+        .get('/api/v1/users')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      if (listResponse.body.length > 0) {
+        const userId = listResponse.body[0].id;
+
+        // 허용되지 않은 필드(name)를 포함한 요청은 ValidationPipe에서 400 에러 반환
+        return request(app.getHttpServer())
+          .patch(`/api/v1/users/${userId}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({
+            height: 180.0,
+            name: '수정되지않아야하는이름',
+          })
+          .expect(400);
       }
     });
   });

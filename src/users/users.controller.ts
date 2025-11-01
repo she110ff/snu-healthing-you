@@ -119,7 +119,7 @@ export class UsersController {
   @ApiBearerAuth('bearer')
   @ApiOperation({
     summary: '사용자 수정',
-    description: '특정 사용자의 정보를 수정합니다.',
+    description: '특정 사용자의 정보를 수정합니다. 수정 가능한 필드: 생년월일, 성별, 키, 몸무게, 시도, 구군',
   })
   @ApiParam({ name: 'id', description: '사용자 ID (UUID)', type: String })
   @ApiResponse({

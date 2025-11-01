@@ -209,19 +209,26 @@ export class UsersService {
   async update(id: string, updateUserDto: UpdateUserDto) {
     await this.findOne(id); // 존재 여부 및 삭제 여부 확인
 
-    const updateData: any = { ...updateUserDto };
+    const updateData: any = {};
 
-    // verificationCode는 업데이트에서 제외
-    delete updateData.verificationCode;
-
-    // 비밀번호가 있는 경우 해싱
-    if (updateUserDto.password) {
-      updateData.password = await bcrypt.hash(updateUserDto.password, 10);
+    // 허용된 필드만 업데이트 데이터에 포함
+    if (updateUserDto.dateOfBirth !== undefined) {
+      updateData.dateOfBirth = new Date(updateUserDto.dateOfBirth);
     }
-
-    // dateOfBirth 문자열을 DateTime으로 변환
-    if (updateData.dateOfBirth) {
-      updateData.dateOfBirth = new Date(updateData.dateOfBirth);
+    if (updateUserDto.gender !== undefined) {
+      updateData.gender = updateUserDto.gender;
+    }
+    if (updateUserDto.height !== undefined) {
+      updateData.height = updateUserDto.height;
+    }
+    if (updateUserDto.weight !== undefined) {
+      updateData.weight = updateUserDto.weight;
+    }
+    if (updateUserDto.sido !== undefined) {
+      updateData.sido = updateUserDto.sido;
+    }
+    if (updateUserDto.guGun !== undefined) {
+      updateData.guGun = updateUserDto.guGun;
     }
 
     return this.prisma.user.update({
