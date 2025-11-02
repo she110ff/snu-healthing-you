@@ -14,3 +14,4 @@ CREATE DATABASE snu_healthing_you_test;
 \echo '  DATABASE_URL="postgresql://postgres:postgres@localhost:5432/snu_healthing_you_test?schema=public" npx prisma migrate deploy'
 
 
+
